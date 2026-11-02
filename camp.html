@@ -21,6 +21,46 @@
     📅 现在是 <b>2026 年 11 月</b>：2026 季已结束（9 月 28 日推免系统填报已定局）。下表「2027 预测窗口」依据各校 2026 实际通知日期推算，<b>3 月起个别顶尖项目（如清华交叉信息研究院等）会提前截止</b>，本站从 2027 年 2 月起每周更新真实通知。
   </div>
 
+  <!-- ====== 付费方案（付费场景显性化） ====== -->
+  <section class="section" style="padding:26px 0 8px" id="pricing">
+    <h2 style="font-size:22px">选择你的备战方式</h2>
+    <p class="sub" style="margin-bottom:16px">通知数据永久免费——我们只对「省时间的交付物」和「独家情报社群」收费。</p>
+    <div class="grid g3" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card">
+        <h3>🆓 免费版</h3>
+        <div style="font-size:28px;font-weight:800;margin:6px 0">¥0</div>
+        <ul style="font-size:13.5px;color:var(--muted);padding-left:18px;line-height:2.1;margin:10px 0 16px">
+          <li>全部院校通知窗口与倒计时</li>
+          <li>关注 / 投递看板 / 材料清单</li>
+          <li>全部日历订阅(.ics)导出</li>
+        </ul>
+        <a class="btn" style="width:100%;justify-content:center" href="#campList">开始使用</a>
+      </div>
+      <div class="card">
+        <h3>🧾 模板自提包</h3>
+        <div style="font-size:28px;font-weight:800;margin:6px 0">¥19.9 <span class="faint" style="font-size:13px;font-weight:400">一次买断</span></div>
+        <ul style="font-size:13.5px;color:var(--muted);padding-left:18px;line-height:2.1;margin:10px 0 16px">
+          <li>个人陈述框架（计算机专版）</li>
+          <li>简历/推荐信模板 · 窗口 CSV</li>
+          <li>关注校专属提醒日历</li>
+        </ul>
+        <button class="btn" style="width:100%;justify-content:center" onclick="openPack()">购买 / 激活</button>
+      </div>
+      <div class="card" style="border-color:rgba(255,180,84,.5);position:relative;background:linear-gradient(180deg,rgba(255,180,84,.07),var(--bg-2))">
+        <span class="tag amber" style="position:absolute;top:14px;right:14px">核心产品</span>
+        <h3>🛰️ 情报社群</h3>
+        <div style="font-size:28px;font-weight:800;margin:6px 0">¥99 <span class="faint" style="font-size:13px;font-weight:400">/ 申请季</span></div>
+        <ul style="font-size:13.5px;color:var(--muted);padding-left:18px;line-height:2.1;margin:10px 0 16px">
+          <li><b style="color:var(--text)">独家情报库</b>：机试回忆/导师口碑/入营背景</li>
+          <li>微信群 + 星球：第一手线报、答疑</li>
+          <li>同届组队、模面、文书互评</li>
+          <li>含 ¥19.9 模板包全部内容</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openCom()">加入社群 / 激活</button>
+      </div>
+    </div>
+  </section>
+
   <div class="grid g4" style="grid-template-columns:repeat(4,1fr);margin-top:18px">
     <div class="stat-card"><div class="label">收录院系数</div><div class="value" id="kTotal">—</div><div class="sub2">计算机/软件方向</div></div>
     <div class="stat-card"><div class="label">已核实 2026 窗口</div><div class="value" id="kVerified" style="color:var(--green)">—</div><div class="sub2">含官方通知链接</div></div>
@@ -28,7 +68,7 @@
     <div class="stat-card"><div class="label">我关注/在投</div><div class="value" id="kMine" style="color:var(--cyan)">0 / 0</div><div class="sub2">关注 / 已投递</div></div>
   </div>
 
-  <div class="card" style="margin-top:18px">
+  <div class="card" style="margin-top:18px" id="campList">
     <div class="toolbar" style="margin-bottom:12px">
       <input id="q" placeholder="🔍 搜学校/院系/关键词（如 软件、联系导师）" style="max-width:300px">
       <select id="fTier" style="max-width:120px"><option value="">全部层次</option><option>C9</option><option>985</option><option>211</option></select>
@@ -47,6 +87,20 @@
     </p>
   </div>
 
+  <!-- ====== 独家情报库（社群壁垒） ====== -->
+  <section class="section" style="padding:26px 0 8px" id="intel">
+    <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+      <div>
+        <h2 style="font-size:22px">🔒 社群独家情报库</h2>
+        <p class="sub" style="margin:6px 0 0">官网不会告诉你的三件事：<b>上机怎么考、导师怎么选、什么背景能入营</b>——全部来自往届营员众包，持续更新。</p>
+      </div>
+      <span style="flex:1"></span>
+      <span class="tag amber" id="intelCount">— 条情报</span>
+    </div>
+    <div class="grid g3" id="intelGrid" style="grid-template-columns:repeat(3,1fr);margin-top:16px"></div>
+    <p class="faint" style="font-size:12px;margin-top:10px">🔒 模糊内容为社群成员可见；情报由营员反馈众包整理，仅供参考、不代表官方，最终以院校通知为准。</p>
+  </section>
+
   <div class="grid g2" style="grid-template-columns:3fr 2fr;margin-top:18px;align-items:start">
     <div class="card">
       <h3 style="margin-bottom:10px">📋 投递作战板</h3>
@@ -63,6 +117,28 @@
         <button class="btn btn-primary btn-sm" id="btnPack" style="width:100%;justify-content:center">解锁模板包 / 输入激活码</button>
         <span id="packState" style="font-size:12px"></span>
       </div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="grid-template-columns:3fr 2fr;margin-top:18px;gap:18px">
+    <div class="card" style="border-color:rgba(255,180,84,.35);background:linear-gradient(180deg,rgba(255,180,84,.06),var(--bg-2))">
+      <h3 style="margin-bottom:8px">🛰️ 情报社群怎么运转</h3>
+      <div style="font-size:13.5px;color:var(--muted);line-height:2">
+        1. 付费后自动发卡密，激活即弹出<b style="color:var(--text)">微信群/星球入口和暗号</b><br>
+        2. 群主每周更新通知线报，成员第一时间收到提醒<br>
+        3. 参营后在群内分享机试题/面试问题/导师风格，沉淀进上方独家库<br>
+        4. <b style="color:var(--amber)">贡献 3 条有效情报 = 免次年年费</b>；拉同专业上岸学长做分享有红包<br>
+        5. 申请季结束社群不解散，转为读研/实习资源群
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="openCom()">¥99 加入 2027 申请季社群</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px">📮 众包一条情报</h3>
+      <p class="faint" style="font-size:12.5px;margin-bottom:10px">你手里的一条机试回忆、一封导师回信、一个入营背景，对下一届就是黄金信息。所有成员都可投稿。</p>
+      <a class="btn" style="width:100%;justify-content:center;margin-bottom:8px" target="_blank" rel="noopener"
+         href="https://github.com/Harvey-Fan/micro-startup-lab/issues/new?labels=intel&title=%E6%83%85%E6%8A%A5%EF%BC%9A%E9%99%A2%E6%A0%A1-%E4%B8%93%E4%B8%9A&body=%E9%99%A2%E6%A0%A1%E9%99%A2%E7%B3%BB%EF%BC%9A%0A%E6%83%85%E6%8A%A5%E7%B1%BB%E5%9E%8B%EF%BC%88%E4%B8%8A%E6%9C%BA/%E9%9D%A2%E8%AF%95/%E5%AF%BC%E5%B8%88/%E5%85%A5%E8%90%A5%E8%83%8C%E6%99%AF%EF%BC%89%EF%BC%9A%0A%E5%85%B7%E4%BD%93%E5%86%85%E5%AE%B9%EF%BC%9A%0A%E5%B9%B4%E4%BB%BD%EF%BC%9A">GitHub 投稿（公开留痕）</a>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="toast('匿名投稿邮箱将在社群开通后公布（也可直接发群主微信）')">匿名投稿说明</button>
+      <div class="callout" style="margin:12px 0 0;font-size:12.5px"><b>贡献榜</b>：首批情报入库后在此鸣谢（可匿名）。<span class="faint">目前 0 条，等你成为第 1 位贡献者。</span></div>
     </div>
   </div>
 
@@ -93,6 +169,30 @@
       <button class="btn btn-primary" id="packRedeem" style="white-space:nowrap">激活</button>
     </div>
     <p class="faint" style="font-size:11.5px;margin-top:10px">支付由面包多完成；所有官方信息仍以院校研究生院通知为准，本工具不代办申请。</p>
+  </div>
+</div>
+
+<!-- 社群弹窗 -->
+<div id="comModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,8,18,.72);backdrop-filter:blur(4px);place-items:center;padding:20px;overflow:auto">
+  <div class="card" style="max-width:470px;width:100%;position:relative;margin:auto">
+    <button id="comClose" style="position:absolute;right:14px;top:12px;background:none;border:none;color:var(--faint);font-size:18px;cursor:pointer">✕</button>
+    <h3 style="font-size:19px">🛰️ 加入 2027 计算机保研情报社群</h3>
+    <div id="comPay" style="margin:12px 0"></div>
+    <div id="comJoin" style="display:none">
+      <div class="callout" style="margin:10px 0">✅ 已激活。请按以下步骤入群（社群权益自激活起覆盖整个 2027 申请季）：</div>
+      <div style="display:grid;gap:10px;font-size:13.5px">
+        <div>① 保存下方二维码，微信扫码添加群主（或搜索站长微信）<br><span class="faint">站长需先把二维码图片放到 images/wechat-qr.png，此处显示占位图</span>
+          <div style="width:150px;height:150px;margin:8px auto;border:1px dashed var(--line-2);border-radius:12px;display:grid;place-items:center;text-align:center;color:var(--faint);font-size:12px">微信群二维码<br>（站长替换）</div></div>
+        <div>② 验证暗号：<code id="comCodeShow" style="color:var(--amber)"></code>（加好友时发送）</div>
+        <div id="starWrap">③ 知识星球：站长配置链接后显示（用于沉淀情报库与文件）</div>
+        <div class="callout warn" style="margin:0;font-size:12.5px">群规：只讨论升学、禁止广告、情报仅供个人参考不得外传；贡献 3 条有效情报免次年年费。</div>
+      </div>
+    </div>
+    <div id="comRedeemWrap" style="display:flex;gap:8px;margin-top:12px">
+      <input id="comCode" placeholder="输入社群卡密 MSL-COM-XXXXXX" style="text-transform:uppercase;font-family:monospace">
+      <button class="btn btn-primary" id="comRedeem" style="white-space:nowrap">激活入群</button>
+    </div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px">支付由面包多完成；未使用卡密支持退款，入群后视为已交付。</p>
   </div>
 </div>
 
@@ -347,10 +447,104 @@ $('#packRedeem').addEventListener('click', async e=>{
   toast('🎉 模板包已解锁','ok'); syncPackUI(); $('#packModal').style.display='none'; downloadAllPack();
 });
 function syncPackUI(){
+  const anyPro = pack.pro || com.pro;
   $('#packState').innerHTML = pack.pro
-    ? '<span class="tag green">✅ 已激活 '+pack.code+'</span>' : '';
-  $('#btnPack').textContent = pack.pro ? '📦 下载模板包文件' : '解锁模板包 / 输入激活码';
+    ? '<span class="tag green">✅ 已激活 '+pack.code+'</span>'
+    : (com.pro ? '<span class="tag amber">🛰️ 社群成员，模板包已包含</span>' : '');
+  $('#btnPack').textContent = anyPro ? '📦 下载模板包文件' : '解锁模板包 / 输入激活码';
 }
+
+/* ================= ¥99 情报社群 ================= */
+const COM_HASHES=[
+  '085178bf0ae0b3df4b5b358a3c52f5b3e8009eccdf56790a1c0d5e4fafe3cd44',
+  '07e86c1a8d72c5418d7ac79263d218e556a16642514414e528f334b7ac690ff9',
+  'dfb92727339a351d80f50e40ad90fed014875ab340bd68030f60a3feba4a883c',
+  'd228c2416fc9c2f67ef6be211cb9cea50c2e4561779efae5c699bd20eff5ece4',
+  '71203b067c13e75587230b4a46a4c0eaa3a4104023442e1d403333483e217e3f',
+  'bb3f17a7139d8ce1af8b8e5d7629a33406505eb783a0b25ef8f8af65afd42f30',
+  '93b0d76099b47077412909b6fe3ccbc63ae51c4a18df58ad98972c927a3656e6',
+  '031820aa08d759647ed0535ba52c1ce8a106e5bf365e47a55e24e87144f52612',
+  '9b69becd71f829530e24c1c9552b48a5cb08d9a7375808764ef5e7b8c1d8afa0',
+  '26652e645e8ca56013ec983350e5ee7a4425bc3cf304745e3ef9a30b664151b5'
+];
+let com = Store.get('by_com', {pro:false});
+
+/* 示例情报：演示内容结构；真实库由社群众包积累（申请季前持续补充） */
+const INTEL = [
+  {school:'清华大学·软件学院', type:'上机考', tag:'red',
+   title:'预推免上机：4 小时，数据结构+软件工程',
+   body:'2026 年预推免 8/26 下午上机 4 小时，次日面试；往年算法题难度接近 LeetCode 中等偏上，含一道工程实现题，允许用 C++/Java。'},
+  {school:'中山大学·计算机学院', type:'导师', tag:'amber',
+   title:'网申必须填意向导师，套磁是前置条件',
+   body:'系统里意向导师不得为空，未提前联系的申请者基本不入营。建议 5 月前读完目标老师 2 篇论文再发邮件，附上简历和成绩单。'},
+  {school:'华中科技大学·计算机', type:'特殊通道', tag:'amber',
+   title:'想读直博走「暑期实习生计划」，7/10 截止',
+   body:'华科直博招生与普通夏令营分开，通过腾讯文档报名，截止后导师直接对接。硕士夏令营另有通知，别投错通道。'},
+  {school:'山东大学·计算机', type:'形式', tag:'cyan',
+   title:'2026 全程线上，无笔试',
+   body:'活动线上进行，报名 6/29–7/8，以综合面试为主，重视项目与专业课基础；对双非相对友好，适合稳妥投递。'},
+  {school:'上海交大·计算机', type:'材料', tag:'cyan',
+   title:'网报系统 + 问卷双提交，缺一审即废',
+   body:'除研招网报名外还必须同步填写学院问卷，每年都有人漏填问卷错失。材料里科研陈述限 800 字。'},
+  {school:'四川大学·计算机(软件)', type:'流程', tag:'cyan',
+   title:'7/3 前后官网放名单，入营须加 QQ 群',
+   body:'不需邮寄纸质材料；录取名单只在学院官网公布且时间很短，入选后须及时加入 QQ 工作群确认，逾期视为放弃。'}
+];
+function blurText(t){ return t.split('').map(c=>c===' '?' ':'●').join(''); }
+function renderIntel(){
+  $('#intelCount').textContent = INTEL.length + ' 条（示例库，2027 申请季众包扩充）';
+  $('#intelGrid').innerHTML = INTEL.map(x=>{
+    const open = com.pro;
+    return `<div class="card" style="position:relative">
+      <div class="tags" style="margin-bottom:8px"><span class="tag ${x.tag}">${x.type}</span><span class="tag">${x.school}</span></div>
+      <h3 style="font-size:15px">${x.title}</h3>
+      <p style="font-size:13px;margin-top:7px;line-height:1.8" class="${open?'muted':''}">${open ? x.body : blurText(x.body)}</p>
+      ${open?'':`<div style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,11,22,.25)">
+        <button class="btn btn-primary" onclick="openCom()">🔒 ¥99 解锁社群情报</button></div>`}
+    </div>`;
+  }).join('');
+}
+function openCom(){
+  const url=Store.get('by_com_url',''), star=Store.get('by_star_url','');
+  if(com.pro){
+    $('#comPay').innerHTML='';
+    $('#comRedeemWrap').style.display='none';
+    $('#comJoin').style.display='block';
+    $('#comCodeShow').textContent='推免雷达-'+com.code.slice(-6);
+    $('#starWrap').innerHTML = star
+      ? '③ 知识星球：<a href="'+star+'" target="_blank" rel="noopener">点击加入星球 →</a>（情报库与文件在星球沉淀）'
+      : '③ 知识星球入口待站长配置（微信群内同步）';
+  } else {
+    $('#comJoin').style.display='none';
+    $('#comRedeemWrap').style.display='flex';
+    $('#comPay').innerHTML = url
+      ? `<a class="btn btn-primary" href="${url}" target="_blank" rel="noopener" style="width:100%;justify-content:center">🛒 面包多购买 ¥99（自动发卡密）</a>
+         <button class="btn btn-sm btn-ghost" id="cfgCom" style="width:100%;justify-content:center;margin-top:8px">配置购买链接</button>`
+      : `<div class="callout warn" style="margin:0;font-size:12.5px">商品尚未上架（内测期可使用站长发放的体验卡密）。配置面包多链接后此处显示购买按钮。</div>
+         <button class="btn btn-sm" id="cfgCom" style="width:100%;justify-content:center;margin-top:8px">配置面包多购买链接</button>`;
+  }
+  $('#comModal').style.display='grid';
+}
+$('#comClose').addEventListener('click',()=>$('#comModal').style.display='none');
+$('#comModal').addEventListener('click',e=>{if(e.target.id==='comModal')e.target.style.display='none';});
+document.addEventListener('click',e=>{
+  if(e.target.id==='cfgCom'){const u=prompt('粘贴 ¥99 社群商品的面包多链接：',Store.get('by_com_url',''));if(u&&/^https?:\/\//.test(u)){Store.set('by_com_url',u);openCom();}}
+});
+$('#comRedeem').addEventListener('click',async e=>{
+  const btn=e.currentTarget,code=$('#comCode').value.trim();
+  if(!code)return toast('请输入社群卡密','err');
+  btn.textContent='验证中…';
+  const ok=COM_HASHES.includes(await sha256Hex(code.toUpperCase()));
+  btn.textContent='激活入群';
+  if(!ok)return toast('卡密无效','err');
+  com.pro=true;com.code=code.toUpperCase();com.time=today();Store.set('by_com',com);
+  if(!pack.pro){pack.pro=true;pack.code='社群赠送';pack.time=today();Store.set('by_pro',pack);}
+  toast('🎉 社群已激活，模板包同步解锁','ok');
+  renderIntel();syncPackUI();openCom();
+});
+renderIntel();
+syncPackUI();
+renderCamps();
 function downloadAllPack(){
   download('个人陈述框架-计算机保研.md',
 `# 个人陈述框架（计算机/软件方向）
