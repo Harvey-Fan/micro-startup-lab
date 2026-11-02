@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>推免雷达 · 计算机/软件夏令营监控</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('camp.html')</script>
+
+<div class="container">
+  <div class="page-head">
+    <div class="tag violet" style="margin-bottom:12px">计算机/软件专版 · 每条数据附官方来源 · 每周更新</div>
+    <h1>🛰️ 推免雷达</h1>
+    <p>保研机构靠「你不知道」收 1–18 万。这个工具反着来：把计算机/软件方向各院校的<b>夏令营报名窗口、截止日、考核形式</b>结构化公开，预测 2027 时间窗口，一键订阅日历提醒。信息平权，只卖模板不卖焦虑。</p>
+  </div>
+
+  <div class="callout warn" style="margin-top:18px">
+    📅 现在是 <b>2026 年 11 月</b>：2026 季已结束（9 月 28 日推免系统填报已定局）。下表「2027 预测窗口」依据各校 2026 实际通知日期推算，<b>3 月起个别顶尖项目（如清华交叉信息研究院等）会提前截止</b>，本站从 2027 年 2 月起每周更新真实通知。
+  </div>
+
+  <div class="grid g4" style="grid-template-columns:repeat(4,1fr);margin-top:18px">
+    <div class="stat-card"><div class="label">收录院系数</div><div class="value" id="kTotal">—</div><div class="sub2">计算机/软件方向</div></div>
+    <div class="stat-card"><div class="label">已核实 2026 窗口</div><div class="value" id="kVerified" style="color:var(--green)">—</div><div class="sub2">含官方通知链接</div></div>
+    <div class="stat-card"><div class="label">距最早预测截止</div><div class="value" id="kEarliest" style="color:var(--amber)">—</div><div class="sub2">天</div></div>
+    <div class="stat-card"><div class="label">我关注/在投</div><div class="value" id="kMine" style="color:var(--cyan)">0 / 0</div><div class="sub2">关注 / 已投递</div></div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="toolbar" style="margin-bottom:12px">
+      <input id="q" placeholder="🔍 搜学校/院系/关键词（如 软件、联系导师）" style="max-width:300px">
+      <select id="fTier" style="max-width:120px"><option value="">全部层次</option><option>C9</option><option>985</option><option>211</option></select>
+      <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="fVerified" style="width:auto">仅看已核实窗口</label>
+      <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="fMine" style="width:auto">只看我关注的</label>
+      <span style="flex:1"></span>
+      <button class="btn btn-sm" id="btnIcsAll">📅 导出全部日历</button>
+      <button class="btn btn-sm btn-primary" id="btnIcsMine">📅 仅关注校日历</button>
+    </div>
+    <div id="campGrid" class="grid g2" style="grid-template-columns:repeat(2,1fr)"></div>
+    <p class="faint" style="font-size:12px;margin-top:14px">
+      ✅ = 已从官网核实 2026 日期；🔎 = 仅找到汇总页或往年通知，2027 以官网为准。发现遗漏或错误？
+      <a href="https://github.com/Harvey-Fan/micro-startup-lab/issues/new" target="_blank" rel="noopener">提交一条通知 →</a>
+    </p>
+  </div>
+
+  <div class="grid g2" style="grid-template-columns:3fr 2fr;margin-top:18px;align-items:start">
+    <div class="card">
+      <h3 style="margin-bottom:10px">📋 投递作战板</h3>
+      <div id="board"></div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 style="margin-bottom:10px">🧾 通用材料清单</h3>
+        <div id="checklist"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">🎒 2027 资料模板包 <span class="tag amber">Pro</span></h3>
+        <p class="faint" style="font-size:12.5px;margin-bottom:10px">个人陈述框架 · 保研简历模板 · 推荐信要点 · 历年窗口表 CSV · 关注校专属日历，面包多 ¥19.9 自动发卡。</p>
+        <button class="btn btn-primary btn-sm" id="btnPack" style="width:100%;justify-content:center">解锁模板包 / 输入激活码</button>
+        <span id="packState" style="font-size:12px"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3 style="margin-bottom:8px">为什么这个工具敢免费公开？</h3>
+    <div class="grid g3" style="grid-template-columns:repeat(3,1fr);gap:12px">
+      <div><b>🏫 单专业做深</b><p class="faint" style="font-size:13px;margin-top:4px">综合平台几百个专业平铺，没人帮你标注「中山要先联系导师」「山大线上」「华科直博走实习通道」这类计算机方向的关键差异。</p></div>
+      <div><b>🔓 反锁定设计</b><p class="faint" style="font-size:13px;margin-top:4px">数据可导出 CSV、提醒用标准日历订阅(.ics)，不装 App、不加群、不收集手机号，来源全部指向官网。</p></div>
+      <div><b>📈 年份复利</b><p class="faint" style="font-size:13px;margin-top:4px">窗口规律、考核形式随年份积累成历史数据库，越早开始做壁垒越深——这是个人开发者能跑赢大机构的唯一方式。</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Pro 弹窗 -->
+<div id="packModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,8,18,.72);backdrop-filter:blur(4px);place-items:center;padding:20px">
+  <div class="card" style="max-width:460px;width:100%;position:relative">
+    <button id="packClose" style="position:absolute;right:14px;top:12px;background:none;border:none;color:var(--faint);font-size:18px;cursor:pointer">✕</button>
+    <h3 style="font-size:19px">🎒 2027 计算机保研资料模板包</h3>
+    <div style="display:grid;gap:7px;font-size:13.5px;margin:12px 0">
+      <div>✅ 个人陈述框架（含计算机专业科研/项目表达模板）</div>
+      <div>✅ 保研简历 Markdown 模板（导师 30 秒视角）</div>
+      <div>✅ 推荐信要点清单（怎么找老师、写什么）</div>
+      <div>✅ 历年夏令营窗口表 CSV + 关注校专属 .ics</div>
+    </div>
+    <div id="packPay" style="margin:12px 0"></div>
+    <div style="display:flex;gap:8px">
+      <input id="packCode" placeholder="输入激活码 MSL-BY-XXXXXX" style="text-transform:uppercase;font-family:monospace">
+      <button class="btn btn-primary" id="packRedeem" style="white-space:nowrap">激活</button>
+    </div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px">支付由面包多完成；所有官方信息仍以院校研究生院通知为准，本工具不代办申请。</p>
+  </div>
+</div>
+
+<script>
+/* ================= 真实数据（2026 季，全部附官方来源） =================
+   verified=true 表示已在官网核实具体报名日期；false 表示仅有汇总页/往年通知，不作死日期。 */
+const CAMPS = [
+  {id:'pku-cs', school:'北京大学', unit:'计算机学院', tier:'C9',
+   open:'2026-06-01', ddl:'2026-06-15', openNote:'报名 6/1–6/15 17:00',
+   tags:['网报系统','材料审核','专业考核'], mode:'', verified:true,
+   url:'https://cs.pku.edu.cn/info/1051/5810.htm',
+   note:'在北大研究生招生网报名，Chrome/Firefox；顶尖项目，排名/科研要求高。'},
+  {id:'sjtu-cs', school:'上海交通大学', unit:'计算机学院（网络空间安全/密码）', tier:'C9',
+   open:null, ddl:'2026-07-10', openNote:'即日起至 7/10 11:00',
+   tags:['网报+问卷双提交'], mode:'', verified:true,
+   url:'https://www.cs.sjtu.edu.cn/bsyjs_zsgz/1748.html',
+   note:'截止时间偏晚但材料多，网报与问卷缺一不可。'},
+  {id:'zju-all', school:'浙江大学', unit:'研究生院·各院系汇总（含计算机/软件）', tier:'C9',
+   open:'2026-05-28', ddl:null, openNote:'5/28 起各院陆续发布',
+   tags:['汇总页','按学院投递'], mode:'', verified:false,
+   url:'http://www.grs.zju.edu.cn/yjszs/2026/0528/c28498a3167457/page.htm',
+   note:'这是全校夏令营通知汇总页，计算机学院截止日以院内链接为准，需逐个核对。'},
+  {id:'hit-comp', school:'哈尔滨工业大学', unit:'计算学部（学术交流营）', tier:'C9',
+   open:'2026-06-05', ddl:'2026-06-22', openNote:'报名 6/5–6/22',
+   tags:['问卷报名','学术交流营'], mode:'', verified:true,
+   url:'https://computing.hit.edu.cn/2026/0605/c11271a393612/page.htm',
+   note:'深圳/威海校区也有独立营，注意区分培养地点。'},
+  {id:'scu-cs', school:'四川大学', unit:'计算机学院（软件学院）', tier:'985',
+   open:null, ddl:'2026-06-25', openNote:'截止 6/25 12:00',
+   tags:['暑期开放营','7/3 前后公布'], mode:'', verified:true,
+   url:'https://sw.scu.edu.cn/info/1038/15844.htm',
+   note:'不需邮寄纸质材料；入选后须及时加入 QQ 工作群。'},
+  {id:'sysu-cs', school:'中山大学', unit:'计算机学院', tier:'985',
+   open:null, ddl:'2026-06-28', openNote:'截止 6/28 24:00',
+   tags:['线下活动','⚠️必须提前联系导师'], mode:'线下', verified:true,
+   url:'https://cse.sysu.edu.cn/article/3565',
+   note:'网申系统里意向导师不得为空——报名前必须先邮件联系并获得导师回应。'},
+  {id:'sdu-cs', school:'山东大学', unit:'计算机科学与技术学院', tier:'985',
+   open:'2026-06-29', ddl:'2026-07-08', openNote:'报名 6/29–7/8',
+   tags:['线上活动'], mode:'线上', verified:true,
+   url:'https://www.cs.sdu.edu.cn/info/1068/6855.htm',
+   note:'2026 为线上形式，报名窗口偏晚，可作稳妥保底投递。'},
+  {id:'bnu', school:'北京师范大学', unit:'校级夏令营系统（含人工智能/计算机相关院系）', tier:'985',
+   open:null, ddl:'2026-06-23', openNote:'截止 6/23 12:00',
+   tags:['校级申请系统'], mode:'', verified:true,
+   url:'https://xly.bnu.edu.cn/www/xly/xly/detail?id=95905a17-b8cb-48c8-9007-93c59ceefe79',
+   note:'在校级系统 xly.bnu.edu.cn 填报，个人陈述模板可从系统下载。'},
+  {id:'xjtu-cs', school:'西安交通大学', unit:'电子与信息学部·计算机科学与技术学院', tier:'C9',
+   open:null, ddl:null, openNote:'2026 第八届通知已发布；2025 报名 6/1–6/10',
+   tags:['夏令营报名系统'], mode:'', verified:false,
+   url:'http://www.cs.xjtu.edu.cn/xwgg/tzgg.htm',
+   note:'2026 具体截止日见学院「通知公告」页；2025 年窗口为 6/1–6/10，预计 2027 同期。'},
+  {id:'hust-cs', school:'华中科技大学', unit:'计算机科学与技术学院（直博暑期实习）', tier:'985',
+   open:null, ddl:'2026-07-10', openNote:'截止 7/10',
+   tags:['⚠️直博通道','腾讯文档报名'], mode:'', verified:true,
+   url:'http://www.cs.hust.edu.cn/info/1439/5681.htm',
+   note:'这是直博生暑期实习计划（不等同普通夏令营），截止后导师直接对接，想读博重点关注。'},
+  {id:'thu-cs', school:'清华大学', unit:'计算机科学与技术系', tier:'C9',
+   open:'2024-05-15', ddl:'2024-05-31', openNote:'2024 参考：5 月中报名，6/14–16 办营',
+   tags:['专业测试','偏直博'], mode:'线下', verified:false,
+   url:'https://www.cs.tsinghua.edu.cn/__local/7/06/23/DBA494F960130A64C7268CAC205_2414F314_3C705.pdf',
+   note:'2027 通知未发布；历史窗口在 5 月中旬，清北系务必 3 月起每周查官网。'},
+  {id:'thu-soft', school:'清华大学', unit:'软件学院', tier:'C9',
+   open:null, ddl:null, openNote:'2026 推免：8/26 上机、8/30 面试',
+   tags:['⚠️上机考','数据结构','预推免'], mode:'线下', verified:true,
+   url:'https://www.thss.tsinghua.edu.cn/__local/4/8F/00/310CE56C555A6BF28110F379CC3_37BED634_21316.pdf',
+   note:'清华软件走预推免+上机考（数据结构与软件工程），不是普通夏令营，算法题现在就该刷。'},
+  {id:'tsinghua-early', school:'清华大学', unit:'交叉信息研究院等早批项目', tier:'C9',
+   open:null, ddl:'2027-03-31', openNote:'往年最早 3 月截止',
+   tags:['⚠️全年最早','须 3 月起盯官网'], mode:'', verified:false,
+   url:'https://admission.pku.edu.cn/xly/index1.htm',
+   note:'据保研网等公开经验，部分顶尖项目 3 月即截止；此处为提醒占位，具体以项目官网为准。'}
+];
+
+/* ================= 状态与工具 ================= */
+let myMap = Store.get('camp_mine', {});   // id -> {watch:bool, status:string, note:string}
+const STATUSES = ['待了解','准备中','已投递','已入营','优营','放弃'];
+const STATUS_CLS = {'待了解':'','准备中':'cyan','已投递':'violet','已入营':'amber','优营':'green','放弃':'red'};
+let pack = Store.get('by_pro', { pro:false });
+
+const plusYear = (iso, y) => iso ? iso.replace(/^\d{4}/, y) : null;
+const daysTo = iso => iso ? Math.ceil((new Date(iso+'T23:59:59') - new Date()) / 86400000) : null;
+function ddlState(ddl2027) {
+  const d = daysTo(ddl2027);
+  if (d == null) return {txt:'窗口待官方发布', cls:''};
+  if (d < 0) return {txt:'已过季', cls:'red'};
+  if (d <= 14) return {txt:d+' 天后截止 · 紧急', cls:'red'};
+  if (d <= 45) return {txt:d+' 天 · 临近', cls:'amber'};
+  if (d <= 120) return {txt:d+' 天 · 该准备材料', cls:'cyan'};
+  return {txt:d+' 天 · 备货期', cls:'green'};
+}
+
+/* ================= 渲染卡片 ================= */
+function renderCamps() {
+  const q = $('#q').value.trim().toLowerCase();
+  const tier = $('#fTier').value, onlyV = $('#fVerified').checked, onlyMine = $('#fMine').checked;
+  const list = CAMPS.filter(c => {
+    if (tier && c.tier !== tier) return false;
+    if (onlyV && !c.verified) return false;
+    if (onlyMine && !(myMap[c.id] && myMap[c.id].watch)) return false;
+    if (q && !(c.school + c.unit + c.note + c.tags.join('')).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  $('#campGrid').innerHTML = list.length ? list.map(c => {
+    const my = myMap[c.id] || {};
+    const ddl27 = plusYear(c.ddl, 2027);
+    const st = ddlState(ddl27);
+    return `<div class="card" style="padding:18px">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <h3 style="margin:0;flex:1;font-size:16px">${c.school} <span class="faint" style="font-size:12.5px;font-weight:400">${c.unit}</span></h3>
+        <button onclick="toggleWatch('${c.id}')" title="关注/取消" style="background:none;border:none;font-size:18px;cursor:pointer;color:${my.watch?'var(--amber)':'var(--faint)'}">${my.watch?'★':'☆'}</button>
+      </div>
+      <div class="tags" style="margin:9px 0">
+        <span class="tag violet">${c.tier}</span>
+        <span class="tag ${c.verified?'green':''}">${c.verified?'✅ 已核实 2026':'🔎 待核实'}</span>
+        ${c.mode?`<span class="tag pink">${c.mode}</span>`:''}
+        ${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}
+      </div>
+      <div style="font-size:13.5px;display:grid;gap:5px">
+        <div>🗓️ <b>2026 实际：</b>${c.openNote}</div>
+        <div>🔮 <b>2027 预测截止：</b>${ddl27?ddl27.slice(5).replace('-','/'):'待发布'} <span class="tag ${st.cls}">${st.txt}</span></div>
+        <div class="faint" style="font-size:12.5px">📝 ${c.note}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <a class="btn btn-sm" href="${c.url}" target="_blank" rel="noopener">官方通知 ↗</a>
+        <select onchange="setStatus('${c.id}',this.value)" style="width:auto;padding:6px 10px;font-size:12.5px">
+          ${STATUSES.map(s=>`<option ${(my.status||'待了解')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('') : '<p class="faint" style="grid-column:1/-1;text-align:center;padding:30px">没有符合条件的院校</p>';
+
+  // 统计
+  $('#kTotal').textContent = CAMPS.length;
+  $('#kVerified').textContent = CAMPS.filter(c=>c.verified).length;
+  const ddls = CAMPS.map(c=>plusYear(c.ddl,2027)).filter(Boolean).map(daysTo).filter(d=>d!=null&&d>0);
+  $('#kEarliest').textContent = ddls.length ? Math.min(...ddls) : '—';
+  const watch = Object.values(myMap).filter(m=>m.watch).length;
+  const applied = Object.values(myMap).filter(m=>['已投递','已入营','优营'].includes(m.status)).length;
+  $('#kMine').textContent = watch + ' / ' + applied;
+  renderBoard();
+}
+
+function renderBoard() {
+  const mine = CAMPS.filter(c => myMap[c.id] && myMap[c.id].watch).map(c => {
+    const ddl27 = plusYear(c.ddl,2027), st = ddlState(ddl27);
+    return {c, st, ddl27};
+  });
+  if (!mine.length) { $('#board').innerHTML = '<p class="faint" style="font-size:13px">点院校卡片右上角的 ☆ 加入关注，这里会按截止紧迫度生成投递看板。</p>'; return; }
+  mine.sort((a,b) => (daysTo(a.ddl27)??9999) - (daysTo(b.ddl27)??9999));
+  $('#board').innerHTML = mine.map(({c,st,ddl27}) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px">
+      <b style="flex:1">${c.school}<span class="faint" style="font-weight:400"> · ${c.unit.slice(0,14)}</span></b>
+      <span class="tag ${STATUS_CLS[myMap[c.id].status]||''}">${myMap[c.id].status||'待了解'}</span>
+      <span class="tag ${st.cls}" style="min-width:120px;text-align:center">${st.txt}</span>
+    </div>`).join('');
+}
+
+window.toggleWatch = id => {
+  const m = myMap[id] || {watch:false,status:'待了解'};
+  m.watch = !m.watch; if (m.watch && m.status==='待了解') m.status='准备中';
+  myMap[id]=m; Store.set('camp_mine',myMap); renderCamps();
+};
+window.setStatus = (id,status) => {
+  const m = myMap[id] || {watch:false,status:'待了解'};
+  m.status=status; if(status!=='待了解')m.watch=true;
+  myMap[id]=m; Store.set('camp_mine',myMap); renderCamps();
+  if(status==='优营') toast('🎉 优营到手，稳住 GPA 等 9.28！','ok');
+};
+['q','fTier','fVerified','fMine'].forEach(id => $('#'+id).addEventListener('input',renderCamps));
+
+/* ================= 材料清单 ================= */
+const MATS = ['本科成绩单（教务盖章）','成绩排名证明','四六级/雅思托福成绩单','个人陈述','简历（1页）',
+  '副教授以上推荐信 2 封','获奖证书扫描件','论文/科研/项目证明','夏令营网申信息表','给意向导师的套磁邮件草稿'];
+let mats = Store.get('camp_mats', {});
+function renderMats(){
+  $('#checklist').innerHTML = MATS.map((m,i)=>`
+    <label class="tl-task ${mats[i]?'done':''}" style="margin-top:6px">
+      <input type="checkbox" ${mats[i]?'checked':''} onchange="toggleMat(${i},this.checked)"><span>${m}</span>
+    </label>`).join('');
+}
+window.toggleMat=(i,v)=>{mats[i]=v;Store.set('camp_mats',mats);renderMats();};
+renderMats();
+
+/* ================= ICS 日历 ================= */
+function icsEscape(s){ return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function buildICS(list){
+  const ev = list.filter(c=>plusYear(c.ddl,2027)).map(c=>{
+    const d = plusYear(c.ddl,2027).replaceAll('-','');
+    const uid = c.id+'-2027@tuimian-radar';
+    return ['BEGIN:VEVENT','UID:'+uid,'DTSTAMP:20261102T000000Z',
+      'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+d,
+      'SUMMARY:'+icsEscape('【保研截止】'+c.school+' '+c.unit.slice(0,12)),
+      'DESCRIPTION:'+icsEscape('2027预测截止日（参考2026实际：'+c.openNote+'）。官方通知：'+c.url),
+      'URL:'+c.url,
+      'BEGIN:VALARM','TRIGGER:-P10D','ACTION:DISPLAY','DESCRIPTION:'+icsEscape(c.school+' 截止还有 10 天，准备材料'),'END:VALARM',
+      'BEGIN:VALARM','TRIGGER:-P3D','ACTION:DISPLAY','DESCRIPTION:'+icsEscape(c.school+' 截止还有 3 天，尽快提交'),'END:VALARM',
+      'END:VEVENT'].join('\r\n');
+  }).join('\r\n');
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//micro-startup-lab//tuimian-radar//ZH','CALSCALE:GREGORIAN','METHOD:PUBLISH',ev,'END:VCALENDAR'].join('\r\n');
+}
+function download(name, text, type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿',text],{type})); a.download=name; a.click();
+  URL.revokeObjectURL(a.href);
+}
+$('#btnIcsAll').addEventListener('click',()=>{download('tuimian-2027-all.ics',buildICS(CAMPS),'text/calendar');toast('已导出全部院校日历，导入手机日历即可自动提醒','ok');});
+$('#btnIcsMine').addEventListener('click',()=>{
+  const list=CAMPS.filter(c=>myMap[c.id]&&myMap[c.id].watch);
+  if(!list.length) return toast('先点 ☆ 关注几所学校','err');
+  if(!pack.pro){ openPack(); return toast('关注校专属日历是模板包功能，可先免费导出全部日历','err'); }
+  download('tuimian-2027-mine.ics',buildICS(list),'text/calendar'); toast('关注校日历已导出','ok');
+});
+
+/* ================= Pro 模板包 ================= */
+const CODE_HASHES=[
+  '4c6981f155eae3b46ab8450468fda98e5db3ef183cfc1f7bb9bcb20dbf6d3baa',
+  '391424533f5733909dc0ea6c945d9ef67ce7563f1f9a7d305210c4d052c1db14',
+  '90f6c84743918710f9932d9ee89dd07570b76e4cbfde0d4c76156f27a15429a6',
+  '8c968486df3a6dc7a6771d9678939ba18f2cf313e2b3a6d43ed82bb3980b4fb6',
+  '40db98348d3a17b448263d4ac30e566f028568963c06b1fa84288d8172200322',
+  '8e2b03a42ea4a1d2cbeffcf5d26baa7b1106204cc930edfc46dfcb69a776a24c',
+  'eeb4f74c22e4d7f1c038550fb018cd8c178b2e010e8adac92fcb7b49369920a0',
+  '9a2068f5d6df66c2564d16aaf27f9ea9fef6cb31d13698023a46fb688f8ddcef',
+  '770d9e53273a24949cb87e38cb9d658243059830503659c0c644c100d346e03e',
+  'a33e8a47253235b95cf8fb264e76834677f68c7a47c2a1c6ed0f853b13551ccf'
+];
+async function sha256Hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function openPack(){
+  const url=Store.get('by_pay_url','');
+  $('#packPay').innerHTML = url
+    ? `<a class="btn btn-primary" href="${url}" target="_blank" rel="noopener" style="width:100%;justify-content:center">🛒 面包多购买（¥19.9，付款后自动发卡）</a>
+       <button class="btn btn-sm btn-ghost" id="cfgPay" style="width:100%;justify-content:center;margin-top:8px">配置购买链接</button>`
+    : `<div class="callout warn" style="margin:0;font-size:12.5px">站长尚未配置面包多链接（开通后在此填入即可）。</div>
+       <button class="btn btn-sm" id="cfgPay" style="width:100%;justify-content:center;margin-top:8px">配置面包多购买链接</button>`;
+  $('#packModal').style.display='grid';
+}
+$('#btnPack').addEventListener('click', ()=> pack.pro ? downloadAllPack() : openPack());
+$('#packClose').addEventListener('click',()=>$('#packModal').style.display='none');
+$('#packModal').addEventListener('click',e=>{if(e.target.id==='packModal')e.target.style.display='none';});
+document.addEventListener('click', e=>{
+  if(e.target.id==='cfgPay'){const u=prompt('粘贴面包多商品链接：',Store.get('by_pay_url',''));if(u&&/^https?:\/\//.test(u)){Store.set('by_pay_url',u);openPack();}}
+});
+$('#packRedeem').addEventListener('click', async e=>{
+  const btn=e.currentTarget, code=$('#packCode').value.trim();
+  if(!code)return toast('请输入激活码','err');
+  btn.textContent='验证中…';
+  const ok=CODE_HASHES.includes(await sha256Hex(code.toUpperCase()));
+  btn.textContent='激活';
+  if(!ok)return toast('激活码无效','err');
+  pack.pro=true; pack.code=code.toUpperCase(); pack.time=today(); Store.set('by_pro',pack);
+  toast('🎉 模板包已解锁','ok'); syncPackUI(); $('#packModal').style.display='none'; downloadAllPack();
+});
+function syncPackUI(){
+  $('#packState').innerHTML = pack.pro
+    ? '<span class="tag green">✅ 已激活 '+pack.code+'</span>' : '';
+  $('#btnPack').textContent = pack.pro ? '📦 下载模板包文件' : '解锁模板包 / 输入激活码';
+}
+function downloadAllPack(){
+  download('个人陈述框架-计算机保研.md',
+`# 个人陈述框架（计算机/软件方向）
+
+## 1. 开场（150字）
+学校/专业/排名/英语一句话亮明，直接说申请方向（如：人工智能/系统/软件理论）。
+
+## 2. 科研经历（核心，400字）
+用 STAR：问题背景 → 你的具体贡献（"我"做了什么，不用"我们"）→ 技术细节（算法/实验）→ 可量化结果。
+- 没有论文就写课程大项目/竞赛项目，重点体现技术深度。
+
+## 3. 工程与竞赛（250字）
+ICPC/蓝桥杯/数模/大创，写清楚角色与成果（排名/获奖比例）。
+
+## 4. 为什么选这所学校/导师（200字）
+点名 1-2 位导师的具体论文方向，说明与你经历的衔接（套磁信也用这段）。
+
+## 5. 研究计划与结尾（150字）
+研究生阶段想解决的具体问题，避免"为中华之崛起"式空话。
+
+> 自检：删掉学校名字还成立的文书就是失败的文书。`, 'text/markdown');
+  setTimeout(()=>download('保研简历模板.md',
+`# 姓名｜目标院校
+
+## 基本信息
+排名 x/xxx（前 x%）｜GPA x.x｜六级 xxx｜电话/邮箱
+
+## 教育背景
+学校 专业 | 主修课程与成绩（只写高分核心课）
+
+## 科研经历
+**项目名** | 角色 | 时间
+- 技术点 + 你的贡献 + 结果（论文/专利/在投）
+
+## 工程/竞赛（按含金量排序）
+- ICPC/CCPC 区域赛 x 牌（前 x%）
+- 蓝桥杯 / 数模 / 大创
+
+## 开源与项目
+GitHub 链接 + 一句话说明 star/技术栈/用户量
+
+## 技能
+语言/框架（只写能面试的）｜英语`, 'text/markdown'),300);
+  setTimeout(()=>download('推荐信要点.md',
+`# 推荐信怎么搞
+1. 人选：教过你且给高分的副教授以上 > 只认识的大牛；最好一封科研、一封课程。
+2. 老师通常让你自己起草：用老师第一人称，写 2-3 个具体事例（课堂表现/项目细节），别堆形容词。
+3. 篇幅一页，抬头写目标学校学院。
+4. 提前 3 周发邮件约，给老师打包：成绩单+简历+陈述+推荐信草稿+贴好邮票的信封（如需要）。
+5. 系统填报老师邮箱前先征得同意，并提醒查收（可能进垃圾箱）。`, 'text/markdown'),600);
+  setTimeout(()=>{
+    const rows=[['学校','院系','层次','2026窗口','2027预测截止','形式','官方通知']].concat(
+      CAMPS.map(c=>[c.school,c.unit,c.tier,c.openNote,plusYear(c.ddl,2027)||'待发布',c.tags.join('/'),c.url]));
+    download('计算机保研夏令营窗口表-2027预测.csv',rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\r\n'),'text/csv');
+  },900);
+  toast('4 个模板文件开始下载','ok');
+}
+syncPackUI();
+renderCamps();
+</script>
+</body>
+</html>

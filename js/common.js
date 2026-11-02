@@ -26,10 +26,11 @@ const today = () => new Date().toISOString().slice(0, 10);
 /* ---------- 导航与页脚 ---------- */
 const NAV = [
   ['index.html', '创意展厅'],
+  ['camp.html', '推免雷达'],
   ['crypto.html', '加密记账'],
   ['radar.html', '信息差雷达'],
   ['health.html', '薄肌实验室'],
-  ['baoyan.html', '保研雷达']
+  ['baoyan.html', '保研工具箱']
 ];
 function renderNav(active) {
   const links = NAV.map(([href, name]) =>
