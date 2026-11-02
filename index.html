@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>微创业实验室 · 信息差产品孵化器</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('index.html')</script>
+
+<div class="container">
+  <!-- HERO -->
+  <header class="hero">
+    <div class="tag cyan" style="margin-bottom:16px">🎓 给软件工程新生的第一份「边学边赚」产品地图</div>
+    <h1>用代码收割<span class="hl">信息差</span><br>把专业课变成提款机，顺便搞定保研</h1>
+    <p class="lead">这里不是「月入十万」的爽文，而是 20 个经过拆解的、大一就能开工的微型产品方向 + 4 个已经跑通交互的 Demo。
+      每个方向都标注了：信息差类型、变现方式、技术栈、启动成本，以及——它怎么帮你刷绩点、打竞赛、进实验室。</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#demos">▶ 先玩 4 个 Demo</a>
+      <a class="btn" href="#ideas">浏览 20 个创意</a>
+      <a class="btn btn-ghost" href="#method">信息差方法论</a>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>20</b><span>可落地微产品方向</span></div>
+      <div class="kpi"><b>4</b><span>零后端可运行 Demo</span></div>
+      <div class="kpi"><b>¥0</b><span>启动资金需求</span></div>
+      <div class="kpi"><b>4年</b><span>创业-学业复利周期</span></div>
+    </div>
+  </header>
+
+  <!-- DEMOS -->
+  <section class="section" id="demos">
+    <h2>四个可以直接上手玩的 Demo</h2>
+    <p class="sub">全部纯前端实现，数据存在你自己浏览器里。它们不是作业——每一个都是真实产品的「最小可售卖版本(MSV)」。</p>
+    <div class="grid g4" style="grid-template-columns:repeat(4,1fr)">
+      <a class="card demo-card" href="crypto.html">
+        <div class="ico" style="background:rgba(255,180,84,.15)">₿</div>
+        <h3>加密记账本</h3>
+        <p>多币种持仓、均价成本、浮动盈亏、交易流水、CSV 导出，行情自动刷新（实时接口失败时无缝切换本地模拟）。</p>
+        <div class="tags"><span class="tag amber">虚拟货币</span><span class="tag">localStorage</span></div>
+        <p class="go" style="margin-top:14px">打开 Demo →</p>
+      </a>
+      <a class="card demo-card" href="radar.html">
+        <div class="ico" style="background:rgba(56,225,255,.13)">🌐</div>
+        <h3>信息差雷达</h3>
+        <p>跨境选品差价计算器（含运费/关税/佣金）、海内外优质信息源库、机会评分看板——信息差生意的作战室。</p>
+        <div class="tags"><span class="tag cyan">海内外套利</span><span class="tag">选品</span></div>
+        <p class="go" style="margin-top:14px">打开 Demo →</p>
+      </a>
+      <a class="card demo-card" href="health.html">
+        <div class="ico" style="background:rgba(61,220,151,.13)">💪</div>
+        <h3>薄肌实验室</h3>
+        <p>基于 Mifflin 公式的 BMR/TDEE 计算、热量与蛋白质目标、体重趋势图、打卡连击、宿舍/健身房训练计划生成。</p>
+        <div class="tags"><span class="tag green">健康投资</span><span class="tag">薄肌</span></div>
+        <p class="go" style="margin-top:14px">打开 Demo →</p>
+      </a>
+      <a class="card demo-card" href="baoyan.html">
+        <div class="ico" style="background:rgba(139,108,255,.15)">🎯</div>
+        <h3>保研雷达</h3>
+        <p>大一到大四保研时间线、竞赛含金量数据库、GPA 计算器——「保研信息差」本身就是可售卖的产品，你先用上。</p>
+        <div class="tags"><span class="tag violet">学业复利</span><span class="tag">竞赛</span></div>
+        <p class="go" style="margin-top:14px">打开 Demo →</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- METHOD -->
+  <section class="section" id="method">
+    <h2>方法论：信息差到底是什么？</h2>
+    <p class="sub">赚钱的本质是低买高卖，而信息差决定了「谁知道该低买什么」。对程序员学生来说，有四类可以合法、可持续收割的信息差：</p>
+    <div class="grid g4" style="grid-template-columns:repeat(4,1fr)">
+      <div class="card"><div style="font-size:26px">🗺️</div><h3 style="margin:10px 0 6px">地域差</h3>
+        <p class="muted" style="font-size:13.5px">同一商品/服务在两地价格不同：跨境差价、海外 SaaS 代购、外服游戏、回国机票线报。</p>
+        <div class="tags"><span class="tag cyan">Demo: 信息差雷达</span></div></div>
+      <div class="card"><div style="font-size:26px">⏳</div><h3 style="margin:10px 0 6px">时间差</h3>
+        <p class="muted" style="font-size:13.5px">信息从中心扩散到边缘有延迟：新项目空投、政策变化、新品首发、实习/竞赛通知。</p>
+        <div class="tags"><span class="tag amber">监控+推送</span></div></div>
+      <div class="card"><div style="font-size:26px">🧠</div><h3 style="margin:10px 0 6px">认知差</h3>
+        <p class="muted" style="font-size:13.5px">你懂别人不懂：怎么科学减脂、论文怎么写、链上数据怎么读、AI 工具怎么用。教就是赚。</p>
+        <div class="tags"><span class="tag green">内容+社群</span></div></div>
+      <div class="card"><div style="font-size:26px">🛠️</div><h3 style="margin:10px 0 6px">技能差</h3>
+        <p class="muted" style="font-size:13.5px">你能做别人做不了：写爬虫、做小程序、部署系统、调 API。卖铲子永远比淘金稳。</p>
+        <div class="tags"><span class="tag violet">技术服务</span></div></div>
+    </div>
+    <div class="callout">💡 <b>学生身份是你最大的杠杆</b>：你有试错权（失败成本极低）、有校园场景（近 5000 万大学生的精准市场）、有学分机制（做项目可以抵大作业/竞赛/论文）。<b>最好的项目是「一份代码，四处兑现」</b>：卖钱 + 课程作业 + 竞赛作品 + 保研作品集。</div>
+  </section>
+
+  <!-- IDEAS -->
+  <section class="section" id="ideas">
+    <h2>20 个微创业创意展厅</h2>
+    <p class="sub">按方向筛选，点开任意卡片查看完整拆解。难度/成本按大一学生视角评估。</p>
+    <div class="filters" id="filters">
+      <button class="chip on" data-cat="all">全部</button>
+      <button class="chip" data-cat="crypto">₿ 加密金融</button>
+      <button class="chip" data-cat="global">🌐 海内外信息差</button>
+      <button class="chip" data-cat="health">💪 健康薄肌</button>
+      <button class="chip" data-cat="ai">🤖 AI 工具</button>
+      <button class="chip" data-cat="campus">🎓 校园学业</button>
+      <button class="chip" data-cat="digital">📦 数字轻资产</button>
+    </div>
+    <div class="grid" id="ideaGrid"></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="section" id="roadmap">
+    <h2>大一 → 保研/盈利：四年复利路线图</h2>
+    <p class="sub">把「做小生意」和「升学」放进同一条轨道，而不是二选一。</p>
+    <div class="grid g4" style="grid-template-columns:repeat(4,1fr)">
+      <div class="card"><span class="pill">大一 · 练手期</span><h3 style="margin:10px 0 8px">用 Demo 学技术</h3>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:2">
+          <li>刷高绩点（数学/编程基础）</li>
+          <li>仿做本站 4 个 Demo 上线 GitHub</li>
+          <li>接 1-2 个小单验证赚钱（¥200 也算）</li>
+          <li>做 1 个垂直内容号攒 500 粉</li>
+        </ul></div>
+      <div class="card"><span class="pill">大二 · 作品期</span><h3 style="margin:10px 0 8px">产品 + 竞赛</h3>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:2">
+          <li>选定 1 个方向做完整 SaaS/小程序</li>
+          <li>冲蓝桥杯/服务外包/互联网+</li>
+          <li>进导师实验室做科研助理</li>
+          <li>产品跑通 0→1 付费用户</li>
+        </ul></div>
+      <div class="card"><span class="pill">大三 · 兑现期</span><h3 style="margin:10px 0 8px">论文 + 入营</h3>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:2">
+          <li>把项目写成论文/软著/专利</li>
+          <li>稳定月收入或 10k+ 用户案例</li>
+          <li>准备夏令营材料（产品即作品集）</li>
+          <li>英语六级 / 雅思</li>
+        </ul></div>
+      <div class="card"><span class="pill">大四 · 选择权</span><h3 style="margin:10px 0 8px">读研 or All in</h3>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:2">
+          <li>拿到保研 offer，或考研/留学</li>
+          <li>有现金流则可休学式创业尝试</li>
+          <li>技术栈+商业认知双履历就业也香</li>
+          <li>继续持有数字资产复利</li>
+        </ul></div>
+    </div>
+    <div class="callout warn">⚠️ <b>三条红线</b>：① 不碰虚拟货币场外撮合/代客理财（法律风险）；② 不爬取/倒卖个人隐私数据；③ 学业 GPA 是 1，创业是后面的 0——保研时排名掉 5 名可能损失一个 985。</div>
+  </section>
+
+  <!-- MONETIZATION -->
+  <section class="section" id="money">
+    <h2>五种适合学生的轻量变现模式</h2>
+    <div class="grid g3" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><h3>🔌 订阅 / 按次付费</h3><p class="muted" style="font-size:13.5px;margin:8px 0">工具型产品：高级功能月费 ¥9.9-29，或积分按次。技术上微信支付/Stripe 一天能接完。</p><div class="tags"><span class="tag">记账工具</span><span class="tag">AI 套壳</span></div></div>
+      <div class="card"><h3>🤝 CPS / 返佣</h3><p class="muted" style="font-size:13.5px;margin:8px 0">导购、外卖红包、海外券商/交易所返佣、SaaS 推荐分成。零库存零售后，内容号+链接即可。</p><div class="tags"><span class="tag">雷达选品</span><span class="tag">导航站</span></div></div>
+      <div class="card"><h3>📚 知识付费 / 社群</h3><p class="muted" style="font-size:13.5px;margin:8px 0">把你刚学会的东西教给落后半步的人：减脂营、AI 工具课、保研经验。押金打卡制还能提升完课率。</p><div class="tags"><span class="tag">薄肌营</span><span class="tag">保研咨询</span></div></div>
+      <div class="card"><h3>📦 数字商品</h3><p class="muted" style="font-size:13.5px;margin:8px 0">模板、资料包、源码：做一次卖无数次，面包多/Gumroad/闲鱼自动发货，睡后收入。</p><div class="tags"><span class="tag">Notion模板</span><span class="tag">源码</span></div></div>
+      <div class="card"><h3>🛠️ 技术服务</h3><p class="muted" style="font-size:13.5px;margin:8px 0">爬虫、小程序、毕设代做（注意学术诚信边界）、帮商家部署开源系统。时薪高，还能反哺技术。</p><div class="tags"><span class="tag">卖铲子</span><span class="tag">接单</span></div></div>
+      <div class="card"><h3>📣 流量广告</h3><p class="muted" style="font-size:13.5px;margin:8px 0">小程序流量主、网站广告位。需要规模，适合作为工具的附加收入而不是唯一收入。</p><div class="tags"><span class="tag">工具矩阵</span><span class="tag">SEO</span></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- 20 个创意数据 ---------- */
+const CAT = {
+  crypto:  {name:'加密金融', cls:'amber'},
+  global:  {name:'海内外', cls:'cyan'},
+  health:  {name:'健康薄肌', cls:'green'},
+  ai:      {name:'AI工具', cls:'pink'},
+  campus:  {name:'校园学业', cls:'violet'},
+  digital: {name:'数字资产', cls:'green'}
+};
+const IDEAS = [
+  {cat:'crypto', title:'多链虚拟货币记账与税务助手', demo:'crypto.html',
+   pain:'持币者在交易所、链上钱包、DeFi 多处持仓，没人说得清自己总成本、均价和真实盈亏；年底算税更崩溃。',
+   gap:'认知差+技能差：懂链上数据读取与法币折算的人极少',
+   money:'免费版限 20 条流水；高级版订阅 ¥15/月；税务报告 ¥49/次；交易所邀请返佣',
+   tech:'HTML/JS → Vue；Etherscan、CoinGecko API；Node 定时任务；图表库',
+   diff:3, cost:'¥0（API 免费额度）',
+   baoyan:'可写「链上数据可视化」软工论文；开源后进实验室的敲门砖；服务外包大赛选题',
+   first:'把本站的加密 Demo 部署上线，在相关社群发「免费帮 10 个人记账」帖收集反馈'},
+  {cat:'crypto', title:'币圈早报 Newsletter + 异动监控 Bot',
+   pain:'信息焦虑的持币者每天刷几十个推特/群，错过暴跌暴涨和新叙事。',
+   gap:'时间差：把英文世界的信息提前 2-8 小时翻译成中文',
+   money:'免费邮件引流 → 付费飞书群 ¥99/年；行情预警高级版；广告与返佣',
+   tech:'Python 爬虫 + LLM 摘要 + 邮件/Telegram Bot 定时推送',
+   diff:2, cost:'¥0-50/月',
+   baoyan:'爬虫/NLP 是自然语言处理方向科研的预训练；可投互联网+',
+   first:'手动做 7 天 PDF 早报发小红书/即刻，验证打开率再自动化'},
+  {cat:'crypto', title:'空投交互日历与小白教程站',
+   pain:'新项目空投动辄价值几千美元，但交互门槛（钱包、测试网、防女巫）劝退新手。',
+   gap:'认知差：链上操作经验 + 项目信息搬运',
+   money:'教程付费专栏；钱包/跨链桥返佣；付费陪跑群',
+   tech:'静态站 + SEO；接钱包 SDK 做交互检查器（进阶）',
+   diff:2, cost:'¥0',
+   baoyan:'Web3 方向竞赛（蚂蚁链等）与创新创业项目储备',
+   first:'整理 3 个当月热门空投的图文教程，发到小红书测流量'},
+  {cat:'global', title:'跨境选品差价雷达', demo:'radar.html',
+   pain:'想做跨境电商/代购的人不知道什么商品国内外有价差，也不会算运费关税后的真实利润。',
+   gap:'地域差：Amazon/独立站与国内 1688/闲鱼的价格断层',
+   money:'会员 ¥29/月看榜单；导购 CPS；付费选品咨询',
+   tech:'爬虫比价 + 定时任务；先做手动榜单再自动化',
+   diff:3, cost:'¥0',
+   baoyan:'数据分析类课程设计/毕设雏形',
+   first:'用本站雷达的计算器手算 20 个商品，做成《本周差价榜》发公众号'},
+  {cat:'global', title:'「海外正在火什么」新品猎人周刊',
+   pain:'TikTok/Product Hunt/Reddit 上的爆品，传到国内电商通常滞后 1-3 个月。',
+   gap:'时间差+语言差',
+   money:'付费订阅 ¥69/年；引流到选品社群；广告',
+   tech:'Notion/公众号起步，后期用 LLM 自动聚合翻译',
+   diff:1, cost:'¥0',
+   baoyan:'锻炼信息检索与英文写作，顺手准备四六级/雅思',
+   first:'每周手动翻译 5 个 Product Hunt 热品 + 国内是否有售的核查'},
+  {cat:'global', title:'出海工具导航站（AI/支付/合规）',
+   pain:'国内开发者想做出海产品，但不知道用什么收款、注册公司、投广告、接客服。',
+   gap:'认知差：出海生态知识极度碎片化',
+   money:'收录费/置顶费；SaaS 返佣（单笔可达几十美元）；广告',
+   tech:'纯静态站 + SEO，技术门槛最低的现金牛',
+   diff:1, cost:'¥0（域名 ¥30/年）',
+   baoyan:'自己做出海项目时它又是基础设施，一份代码两份用',
+   first:'GitHub 找 3 个 awesome 列表整合成本地化导航，补中文说明'},
+  {cat:'global', title:'英文学术/科技情报精读简报',
+   pain:'教授、研究生、技术人没时间读 arXiv、HN、IEEE 的新东西，本科生里更少有人做搬运。',
+   gap:'语言差+专业差：能读懂英文技术内容的中文用户缺口大',
+   money:'知识星球/Substack 付费订阅；接企业情报定制',
+   tech:'LLM 辅助翻译 + 人工校对；定时邮件',
+   diff:2, cost:'¥0',
+   baoyan:'⭐ 直接训练文献阅读能力，给导师干活都更顺手，保研面试谈资',
+   first:'选你最感兴趣的一个方向（如 HCI），每周精读 2 篇 arXiv 新论文'},
+  {cat:'health', title:'12 周薄肌打卡营（小程序/Web）', demo:'health.html',
+   pain:'年轻人想变瘦变有型但请不起私教；Keep 太泛化，健身房推销太重，缺「宿舍党/学生党」垂直方案。',
+   gap:'认知差：运动营养科学（热量缺口、蛋白质 g/kg、渐进超负荷）大众理解极浅',
+   money:'押金打卡制（完赛退款/瓜分）¥49；21 天线上营 ¥99；代餐/补剂带货 CPS',
+   tech:'小程序 + 云开发；体重图表（本站 Demo 已是雏形）',
+   diff:2, cost:'¥0（云开发免费额度）',
+   baoyan:'健康行为数据可做用户研究/HCI 方向论文；互联网+红旅赛道',
+   first:'先拉 20 个同学进微信群，用本站 Demo + 腾讯文档手动跑一期验证留存'},
+  {cat:'health', title:'大学生食堂热量/蛋白质选择器',
+   pain:'减脂期在食堂不知道怎么打饭，热量 App 里几乎没有中国高校食堂菜品。',
+   gap:'场景差：通用 App 看不上的脏数据，恰是 4000 万在校生刚需',
+   money:'小程序流量主广告；学校周边轻食店团购；代餐 CPS',
+   tech:'小程序 + UGC 菜品众包；图片识别热量（AI 接口）',
+   diff:2, cost:'¥0',
+   baoyan:'UGC + 图像识别可包装成大创项目',
+   first:'先把自己学校 3 个食堂 50 个常见菜手动录入，校内群冷启动'},
+  {cat:'health', title:'宿舍自重训练 AI 计划生成器',
+   pain:'瘦子/微胖新手不会安排训练，网上计划要么要器械要么不科学。',
+   gap:'认知差+AI 红利：把训练学知识灌进 Prompt 就是产品',
+   money:'免费生成基础计划，详细计划+动作视频库 ¥9.9；会员',
+   tech:'调 LLM API + 动作库；网页/小程序',
+   diff:1, cost:'¥0-20（API 费）',
+   baoyan:'AI 应用开发竞赛；Prompt 工程经验写进简历',
+   first:'先用现成 AI 手动帮 10 个同学出计划，沉淀提示词模板'},
+  {cat:'ai', title:'垂直 AI 小工具矩阵（简历/周报/PPT/文案）',
+   pain:'通用 AI 不会用的人愿意为「一键生成 XX」的傻瓜界面付费。',
+   gap:'技能差：套壳的技术和选品眼光',
+   money:'按次/会员 ¥6.9 起；流量主广告；矩阵化',
+   tech:'Vercel + Next.js + LLM API，一个周末上线一个',
+   diff:1, cost:'¥0',
+   baoyan:'快速积累全栈作品，面试/夏令营最能打的就是「有用户的产品」',
+   first:'选你自己最痛的场景（如实验报告模板生成）做第一个'},
+  {cat:'ai', title:'论文文献管理 + 综述辅助工具',
+   pain:'本科生不会系统读文献、写综述，研究生也嫌整理 PDF 痛苦。',
+   gap:'认知差：你先学会文献工作流，再产品化教别人',
+   money:'学生版免费，高级版订阅；保研/考研资料包联动',
+   tech:'PDF 解析 + LLM + 笔记系统',
+   diff:4, cost:'¥0',
+   baoyan:'⭐ 自用直接提升科研效率，发文献计量类论文也顺理成章',
+   first:'从 Obsidian+Zotero 手动工作流开始，找到最痛的 1 个环节再写代码'},
+  {cat:'ai', title:'AI 证件照/图片处理站',
+   pain:'求职季、考试报名季，证件照换装换底色需求高频且急切。',
+   gap:'时间差：线下照相馆 30 元的活，AI 几秒成本几毛',
+   money:'免费低清，高清/冲印 ¥4.9-9.9；季节性流量大',
+   tech:'图像 API + 支付，部署即可',
+   diff:1, cost:'¥0',
+   baoyan:'适合作为练手项目，重点学部署和支付闭环',
+   first:'开学季/秋招季前两周上线，本校群发二维码'},
+  {cat:'campus', title:'保研竞赛雷达与时间线', demo:'baoyan.html',
+   pain:'保研信息极度不对称：很多人大三才知道竞赛/夏令营规则，大一大二的动作全错。',
+   gap:'信息差之王：院校政策、竞赛含金量、导师名额都没有聚合产品',
+   money:'免费工具引流；1v1 咨询 ¥199/h；资料包；机构合作分成',
+   tech:'数据采集 + 结构化数据库 + 搜索；社区 UGC',
+   diff:3, cost:'¥0',
+   baoyan:'⭐ 你自己就是第一批深度用户，调研过程就是人脉积累',
+   first:'用本站 Demo 管理自己的时间线；采访 3 位保研学长整理成爆款帖'},
+  {cat:'campus', title:'校内真题/资料 UGC 流转平台',
+   pain:'期末真题、考研笔记在群文件里反复失传，二手交易群信息混乱。',
+   gap:'资源差+组织差',
+   money:'积分下载/会员 ¥9.9 一学期；打印店/培训机构广告',
+   tech:'小程序 + 云开发；注意只做 UGC 原创笔记，不碰盗版教材',
+   diff:2, cost:'¥0',
+   baoyan:'大创、校园创业比赛的标准好题材',
+   first:'先做飞书多维表格版验证：建一个学院的资料库，找班长推广'},
+  {cat:'campus', title:'实习/内推信息聚合板',
+   pain:'实习信息散在牛客、小红书、各种群，大一的你比学长更懂写爬虫。',
+   gap:'时间差：投递窗口往往只有几天',
+   money:'社群会员；简历修改/模拟面试服务；招聘 CPS',
+   tech:'爬虫聚合 + 关键词订阅推送（邮件/微信）',
+   diff:3, cost:'¥0',
+   baoyan:'自己找实习时信息永不滞后；还能认识一堆 HR',
+   first:'先聚合 5 个免费来源做每日推送，投递给同专业同学'},
+  {cat:'digital', title:'Notion / Excel 模板店',
+   pain:'记账、备考、减脂、申校——人们愿意为「整理好的框架」付小钱。',
+   gap:'审美差+认知差：信息架构能力',
+   money:'面包多/闲鱼/Gumroad，单价 ¥9.9-49，自动发货睡后收入',
+   tech:'纯设计活，配一个精美着陆页即可',
+   diff:1, cost:'¥0',
+   baoyan:'做一套「保研/考研管理系统模板」直接引流到高客单咨询',
+   first:'把你正在用的学习/记账模板（比如参考本站 Demo）打磨上架'},
+  {cat:'digital', title:'信息差短视频账号矩阵 + 虚拟资料交付',
+   pain:'抖音/小红书上「AI 工具盘点」「省钱攻略」类内容需求巨大但供给粗糙。',
+   gap:'流量认知差：你比同龄人更懂工具，也更懂做工具自动产内容',
+   money:'挂车卖资料包 ¥9.9；引流私域卖高客单；广告',
+   tech:'剪映 + AI 批量脚本/配音；私域用企业微信',
+   diff:1, cost:'¥0',
+   baoyan:'运营数据与流量思维是创新创业比赛答辩的硬通货',
+   first:'选一个你真懂的细分（如学生党 AI 提效），日更 14 天测号'},
+  {cat:'digital', title:'闲鱼选品数据助手（卖铲子）',
+   pain:'闲鱼卖家不知道什么在涨、什么有差价，全靠手感。',
+   gap:'平台差：公开的价格数据没人结构化',
+   money:'卖榜单会员 ¥39/月；卖监控脚本 ¥99 一份（注意合规，只用公开数据）',
+   tech:'Python 数据采集 + 飞书机器人推送',
+   diff:3, cost:'¥0',
+   baoyan:'数据分析作品集，可接统计学/数据库课程设计',
+   first:'手动整理一周「闲鱼热门数码差价榜」作为引流钩子'},
+  {cat:'digital', title:'开源 SaaS 部署代搭服务',
+   pain:'小商家、个体户想用开源系统（点餐、预约、收银、官网）但不会部署。',
+   gap:'技能差：命令行和 Docker 对普通人是天书',
+   money:'单次部署 ¥200-800 + 年维护费；标准化后卖教程',
+   tech:'Docker、Linux、云服务器——全是专业课核心技能',
+   diff:3, cost:'¥0（学生机免费）',
+   baoyan:'Linux/容器能力是进实验室和找后端实习的硬通货',
+   first:'在闲鱼/学校周边发「¥199 帮你上线一个网站」，接 3 单练手'}
+];
+
+const stars = n => '★'.repeat(n) + '<span style="opacity:.25">★'.repeat(5 - n) + '</span>';
+function renderIdeas(cat) {
+  const grid = $('#ideaGrid');
+  const list = cat === 'all' ? IDEAS : IDEAS.filter(i => i.cat === cat);
+  grid.innerHTML = list.map((i, idx) => {
+    const no = String(IDEAS.indexOf(i) + 1).padStart(2, '0');
+    const c = CAT[i.cat];
+    return `<details class="card idea">
+      <summary><div class="idea-head">
+        <span class="idea-no">${no}</span>
+        <h3><span class="tag ${c.cls}" style="vertical-align:middle;margin-right:8px">${c.name}</span>${i.title}
+          ${i.demo ? '<span class="demo-flag">有 Demo</span>' : ''}</h3>
+        <span class="chev">▼</span>
+      </div></summary>
+      <div class="idea-body">
+        <dl class="kv">
+          <dt>痛点</dt><dd>${i.pain}</dd>
+          <dt>信息差</dt><dd>${i.gap}</dd>
+          <dt>怎么赚钱</dt><dd>${i.money}</dd>
+          <dt>技术栈</dt><dd>${i.tech}</dd>
+          <dt>难度</dt><dd style="color:var(--amber)">${stars(i.diff)}</dd>
+          <dt>启动成本</dt><dd>${i.cost}</dd>
+          <dt>保研加成</dt><dd style="color:var(--green)">${i.baoyan}</dd>
+          <dt>第一步</dt><dd><b>${i.first}</b></dd>
+        </dl>
+        ${i.demo ? `<div style="margin-top:14px"><a class="btn btn-sm btn-primary" href="${i.demo}">打开对应 Demo →</a></div>` : ''}
+      </div>
+    </details>`;
+  }).join('');
+}
+$('#filters').addEventListener('click', e => {
+  if (!e.target.dataset.cat) return;
+  $$('#filters .chip').forEach(c => c.classList.remove('on'));
+  e.target.classList.add('on');
+  renderIdeas(e.target.dataset.cat);
+});
+renderIdeas('all');
+</script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>薄肌实验室 · 像经营创业项目一样经营身材</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('health.html')</script>
+
+<div class="container">
+  <div class="page-head">
+    <h1>💪 薄肌实验室 <span class="pill">Demo</span></h1>
+    <p>「薄肌」是这届年轻人最聪明的自我投资：不追求夸张块头，只要低体脂 + 清晰线条 + 持久精力。这个工具把运动营养学公式直接产品化——它既是你的私人教练，也是「12 周打卡营」产品的 MVP。</p>
+  </div>
+
+  <div class="tabs" style="margin-top:20px">
+    <button class="tab on" data-group="h" data-target="paneDash">📊 目标测算</button>
+    <button class="tab" data-group="h" data-target="paneLog">📈 体重与打卡</button>
+    <button class="tab" data-group="h" data-target="panePlan">🏋️ 训练计划</button>
+    <button class="tab" data-group="h" data-target="paneKnow">📚 薄肌理论速通</button>
+  </div>
+
+  <!-- ===== 测算 ===== -->
+  <section class="tabpane on" id="paneDash" data-group="h">
+    <div class="grid g2" style="grid-template-columns:2fr 3fr;align-items:start">
+      <div class="card">
+        <h3 style="margin-bottom:14px">你的身体数据</h3>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>性别</label><select id="pSex"><option value="m">男</option><option value="f">女</option></select></div>
+          <div class="field"><label>年龄</label><input id="pAge" type="number" value="19"></div>
+          <div class="field"><label>身高 (cm)</label><input id="pH" type="number" value="172"></div>
+          <div class="field"><label>体重 (kg)</label><input id="pW" type="number" step="0.1" value="65"></div>
+          <div class="field"><label>目标体重 (kg，选填)</label><input id="pTarget" type="number" step="0.1" placeholder="如 60"></div>
+          <div class="field"><label>训练条件</label>
+            <select id="pPlace"><option value="dorm">宿舍/自重</option><option value="gym">健身房</option></select></div>
+          <div class="field" style="grid-column:1/3"><label>日常活动水平</label>
+            <select id="pAct">
+              <option value="1.2">久坐（上课/宿舍为主，几乎不运动）</option>
+              <option value="1.375" selected>轻度活动（每周 1-3 次训练）</option>
+              <option value="1.55">中度活动（每周 3-5 次训练）</option>
+              <option value="1.725">高强度（每周 6-7 次训练/体力活）</option>
+            </select></div>
+          <div class="field" style="grid-column:1/3"><label>我的目标</label>
+            <select id="pGoal">
+              <option value="cut">减脂出线条（薄肌本肌）</option>
+              <option value="bulk">偏瘦增肌（先打底子）</option>
+              <option value="keep">维持现状/塑形</option>
+            </select></div>
+        </div>
+        <button class="btn btn-primary" id="btnSaveP" style="margin-top:16px">保存并生成方案</button>
+        <p class="faint" style="font-size:12px;margin-top:10px">数据仅存本地浏览器。公式：Mifflin-St Jeor BMR × 活动系数。</p>
+      </div>
+
+      <div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px">
+          <div class="stat-card"><div class="label">BMI</div><div class="value" id="oBmi">—</div><div class="sub2" id="oBmiTag">—</div></div>
+          <div class="stat-card"><div class="label">基础代谢 BMR</div><div class="value" id="oBmr">—</div><div class="sub2">躺平一天的消耗</div></div>
+          <div class="stat-card"><div class="label">每日总消耗 TDEE</div><div class="value" id="oTdee">—</div><div class="sub2">千卡/天</div></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-bottom:10px">🎯 你的每日营养目标</h3>
+          <div id="macro"></div>
+          <div class="callout" style="margin-bottom:0" id="goalNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-bottom:10px">🍗 蛋白质地图（校园易得版）</h3>
+      <p class="faint" style="font-size:12.5px;margin-bottom:8px">按每 100g 可食部 / 常见一份估算，具体以包装为准</p>
+      <div class="grid g4" style="grid-template-columns:repeat(4,1fr);gap:10px" id="foodGrid"></div>
+
+      <div style="margin-top:18px;border-top:1px dashed var(--line);padding-top:16px">
+        <h3 style="margin-bottom:6px">🔎 查真实包装食品营养 <span class="tag green" style="vertical-align:middle">Open Food Facts 实时数据库</span></h3>
+        <p class="faint" style="font-size:12.5px;margin-bottom:10px">全球开源食品数据库，200 万+ 包装食品实测营养标签。用英文关键词命中率更高，如 chicken breast / greek yogurt / oatmeal / tofu</p>
+        <div class="form-row">
+          <div class="field"><input id="ffQ" placeholder="输入食品关键词，回车查询" value="greek yogurt"></div>
+          <button class="btn btn-primary" id="btnFF" style="max-width:120px">查询</button>
+        </div>
+        <div id="ffResults" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 体重打卡 ===== -->
+  <section class="tabpane" id="paneLog" data-group="h">
+    <div class="grid g2" style="grid-template-columns:3fr 2fr;align-items:start">
+      <div class="card">
+        <h3 style="margin-bottom:12px">体重趋势</h3>
+        <canvas id="wChart" style="width:100%"></canvas>
+        <div class="legend"><span><i style="background:#3ddc97"></i>体重(kg)</span><span><i style="background:#ffb454"></i>目标线</span></div>
+        <div style="margin-top:16px" class="form-row">
+          <div class="field" style="max-width:160px"><label>日期</label><input id="lDate" type="date"></div>
+          <div class="field" style="max-width:140px"><label>体重 (kg)</label><input id="lW" type="number" step="0.1"></div>
+          <div class="field"><label>备注（吃了啥/训练状态）</label><input id="lNote" placeholder="如: 练腿日，水肿"></div>
+          <button class="btn btn-primary" id="btnAddW">记录</button>
+        </div>
+      </div>
+      <div>
+        <div class="card center">
+          <div class="label muted">🔥 打卡连击</div>
+          <div class="streak-num" style="margin:6px 0"><span id="streak">0</span> 天</div>
+          <button class="btn btn-primary" id="btnCheckin" style="width:100%;justify-content:center">今日打卡（训练/饮食完成）</button>
+          <div id="dots" style="display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
+          <p class="faint" style="font-size:12px;margin-top:10px" id="checkHint">近 14 天</p>
+        </div>
+        <div class="card" style="margin-top:14px;padding:0;overflow:hidden">
+          <h3 style="padding:16px 18px 0">历史记录</h3>
+          <div style="padding:12px 18px 16px">
+            <div class="table-wrap"><table>
+              <thead><tr><th>日期</th><th>体重</th><th>备注</th><th></th></tr></thead>
+              <tbody id="wBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 训练计划 ===== -->
+  <section class="tabpane" id="panePlan" data-group="h">
+    <div class="callout">计划根据你的「目标 × 训练条件」生成。核心原则只有一条：<b>渐进超负荷</b>——这周比上周多做 1 个、多蹲 2.5kg、少歇 10 秒，肌肉就有理由生长。</div>
+    <div class="grid g2" id="planGrid" style="grid-template-columns:repeat(2,1fr)"></div>
+  </section>
+
+  <!-- ===== 知识 ===== -->
+  <section class="tabpane" id="paneKnow" data-group="h">
+    <div class="grid g2" style="grid-template-columns:repeat(2,1fr)">
+      <div class="card"><h3>🧊 什么是「薄肌」审美？</h3>
+        <p class="muted" style="font-size:14px;margin-top:8px">薄肌 = <b style="color:var(--text)">体脂足够低</b>（男约 12-16%，女约 20-24%）+ <b style="color:var(--text)">适量肌肉量</b>。
+        穿衣服显瘦、脱衣服有线条，训练成本远低于健美路线，非常适合学业繁忙的学生党。它是「自我投资」思潮下的理性选择：健康、外形、精力三者复利。</p></div>
+      <div class="card"><h3>⚖️ 第一性原理：能量平衡</h3>
+        <p class="muted" style="font-size:14px;margin-top:8px">体重变化只取决于热量缺口/盈余：减 1kg 脂肪约需 7700 千卡缺口。
+        建议温和缺口 <b style="color:var(--text)">每日 300-500 千卡</b>（每周约减 0.3-0.5kg），太猛会掉肌肉、暴食、影响学习状态。增肌反过来，每日盈余 200-300 千卡即可。</p></div>
+      <div class="card"><h3>🥩 蛋白质为什么是主角？</h3>
+        <p class="muted" style="font-size:14px;margin-top:8px">减脂期热量不足时身体会拆肌肉供能，高蛋白（1.6-2.0g/kg 体重）+ 力量训练能告诉身体「肌肉还有用，先烧脂肪」。
+        蛋白质还最顶饱、食物热效应最高。学生版方案：<b style="color:var(--text)">鸡蛋 + 鸡胸/鸡腿去皮 + 牛奶/无糖酸奶 + 豆腐 + 食堂清蒸鱼</b>，不需要补剂。</p></div>
+      <div class="card"><h3>📈 渐进超负荷</h3>
+        <p class="muted" style="font-size:14px;margin-top:8px">肌肉只响应「比上次更难一点」的刺激。自重训练同样适用：标准跪姿俯卧撑→标准→下斜→弓箭手→单手辅助；
+        深蹲→保加利亚分腿蹲→单腿深蹲。每次训练记录组数次数，争取下次超越。</p></div>
+      <div class="card"><h3>😴 被低估的睡眠与 NEAT</h3>
+        <p class="muted" style="font-size:14px;margin-top:8px">肌肉在睡觉时长，睡眠不足会升高皮质醇、降低胰岛素敏感性、让人更想吃高糖食物。
+        NEAT（非运动消耗，如走路、爬楼梯）每天能差出 300-500 千卡。能走路不坐校车，是被忽略的减脂神器。</p></div>
+      <div class="card"><h3>🚫 新手四大坑</h3>
+        <ul class="muted" style="font-size:14px;margin-top:8px;padding-left:18px;line-height:2">
+          <li>只做有氧不做力量 → 减重但松垮</li>
+          <li>极端节食/断碳 → 反弹快、掉头发、情绪差</li>
+          <li>天天称体重就崩溃 → 看周均值，女性看经期周期</li>
+          <li>买一堆补剂 → 90% 的人只需要蛋白粉（凑不够蛋白时）</li>
+        </ul></div>
+    </div>
+  </section>
+</div>
+
+<script>
+initTabs();
+
+/* ---------- 资料 ---------- */
+const FOODS = [
+  ['🥚 水煮蛋','13g/100g','1 个约 6-7g，最便宜的蛋白'],
+  ['🍗 鸡胸肉','24g/100g','食堂香煎/凉拌均可'],
+  ['🥛 纯牛奶','3.2g/100ml','250ml ≈ 8g，睡前一瓶'],
+  ['🧀 无糖酸奶','3.5g/100g','挑配料表只有生牛乳+菌的'],
+  ['🫘 北豆腐','12g/100g','植物蛋白天花板'],
+  ['🐟 清蒸鱼','18g/100g','食堂清蒸窗口'],
+  ['🥩 酱牛肉','25g/100g','稍贵，增肌期投资'],
+  ['🥜 鸡胸/金枪鱼罐头','20g+/100g','宿舍免煮应急']
+];
+$('#foodGrid').innerHTML = FOODS.map(f=>`
+  <div style="border:1px solid var(--line);border-radius:11px;padding:11px 13px">
+    <b style="font-size:13.5px">${f[0]}</b><div style="color:var(--green);font-size:13px;font-weight:700;margin:3px 0">${f[1]}</div>
+    <div class="faint" style="font-size:11.5px;line-height:1.5">${f[2]}</div></div>`).join('');
+
+/* ---------- Open Food Facts 真实食品检索（双端点+重试，网络抖动自动恢复） ---------- */
+function n100(n) { return (n == null || Number.isNaN(+n)) ? '—' : (+n).toFixed(1); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function fetchOFF(url, ms) { return fetchJSON(url, ms); }
+async function searchFood() {
+  const q = $('#ffQ').value.trim();
+  if (!q) return toast('先输入要查的食品', 'err');
+  $('#ffResults').innerHTML = '<p class="faint" style="font-size:13px">正在查询全球食品数据库…</p>';
+  const term = encodeURIComponent(q);
+  const fields = 'product_name,brands,nutriments,image_front_url';
+  const urls = [
+    'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + term + '&search_simple=1&action=process&json=1&page_size=10&fields=' + fields,
+    'https://world.openfoodfacts.org/api/v2/search?search_terms=' + term + '&page_size=10&fields=' + fields
+  ];
+  let d = null;
+  for (let attempt = 0; attempt < 3 && !d; attempt++) {
+    for (const u of urls) {
+      try { const x = await fetchOFF(u, 10000); if (x && (x.products || []).length) { d = x; break; } } catch (e) {}
+    }
+    if (!d && attempt < 2) {
+      $('#ffResults').innerHTML = '<p class="faint" style="font-size:13px">网络抖动，正在重试…</p>';
+      await sleep(900);
+    }
+  }
+  try {
+    const list = (d && d.products || []).filter(p => p.product_name && p.nutriments);
+    if (!list.length) { $('#ffResults').innerHTML = '<p class="faint" style="font-size:13px">没有查到，换个英文关键词试试（如 milk / tuna / protein bar）</p>'; return; }
+    $('#ffResults').innerHTML = '<div class="grid g2" style="grid-template-columns:repeat(2,1fr);gap:10px">' + list.slice(0, 8).map(p => {
+      const nu = p.nutriments || {};
+      const kcal = nu['energy-kcal_100g'] ?? nu['energy_100g'] ? (nu['energy-kcal_100g'] != null ? +nu['energy-kcal_100g'] : Math.round((+nu['energy_100g'])/4.184)) : null;
+      const prot = +nu.proteins_100g;
+      const mark = prot >= 12 ? '<span class="tag green">高蛋白</span>' : prot >= 6 ? '<span class="tag cyan">适量蛋白</span>' : '';
+      return `<div style="display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:10px 12px">
+        ${p.image_front_url ? `<img src="${p.image_front_url}" alt="" style="width:46px;height:46px;object-fit:contain;border-radius:7px;background:var(--bg-2);flex:none">` : '<div style="width:46px;height:46px;border-radius:7px;background:var(--bg-2);flex:none;display:grid;place-items:center;font-size:20px">🥫</div>'}
+        <div style="min-width:0">
+          <b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.product_name}</b>
+          <div class="faint" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.brands || ''} ${mark}</div>
+          <div style="font-size:12.5px;margin-top:3px" class="muted">
+            <b style="color:var(--green)">蛋白 ${n100(prot)}g</b> · 热量 ${n100(kcal)} kcal · 碳水 ${n100(nu.carbohydrates_100g)}g · 脂肪 ${n100(nu.fat_100g)}g
+            <span class="faint">/ 100g</span></div>
+        </div></div>`;
+    }).join('') + '</div>';
+  } catch (e) {
+    $('#ffResults').innerHTML = '<p class="faint" style="font-size:13px">食品数据库暂时连不上（网络受限），校园食物蛋白质可参考上方速查表</p>';
+  }
+}
+$('#btnFF').addEventListener('click', searchFood);
+$('#ffQ').addEventListener('keydown', e => { if (e.key === 'Enter') searchFood(); });
+searchFood();
+
+const PLANS = {
+  cut_dorm: [
+    ['周一 · 上肢推力','俯卧撑 4组（力竭前停2个）','上斜俯卧撑/凳子臂屈伸 3组','平板支撑 3×45秒'],
+    ['周二 · 燃脂走','快走/慢跑 30 分钟（能说话但不能唱歌的强度）','楼梯机/爬宿舍楼 10 分钟',''],
+    ['周三 · 下肢','徒手深蹲 4×20','保加利亚分腿蹲 3×12/腿','臀桥 3×20 + 提踵 3×25'],
+    ['周四 · 休息/拉伸','校园散步 8000 步','10 分钟拉伸',''],
+    ['周五 · 上肢拉力','门框引体/反向划船 4组（单杠场地）','俯身毛巾划船 3×15','超人背伸展 3×15'],
+    ['周六 · 核心循环','循环 3 轮：卷腹20+登山跑30秒+深蹲跳15+平板45秒','轮间歇 90 秒',''],
+    ['周日 · 休息','散步 + 备下周鸡蛋牛奶','睡够 8 小时','']
+  ],
+  bulk_dorm: [
+    ['周一 · 胸/三头','俯卧撑 5组（渐难变式）','凳子臂屈伸 4组','窄距俯卧撑 3组'],
+    ['周二 · 腿/臀','深蹲 5×15','保加利亚分腿蹲 4×12','单腿臀桥 4×15'],
+    ['周三 · 休息','拉伸+走路','',''],
+    ['周四 · 背/二头','引体/澳式引体 5组','反向划船 4组','弯举（书包负重）4×12'],
+    ['周五 · 肩/核心','派克俯卧撑 4×10','侧平板 3×30秒/侧','悬垂举腿 3×12'],
+    ['周六 · 全身强化','挑本周最难的 4 个动作各 4 组','记录数据准备下周加量',''],
+    ['周日 · 休息','重点：多吃一餐 + 睡 9 小时','','']
+  ],
+  cut_gym: [
+    ['周一 · 推','卧推/史密斯 4×8','坐姿推肩 3×10','三头下压 3×12 + 20分钟爬坡走'],
+    ['周二 · 有氧+核心','坡度走 30 分钟（坡度12/速度5）','卷腹/举腿 4组',''],
+    ['周三 · 拉','高位下拉 4×10','坐姿划船 4×10','坐姿弯举 3×12'],
+    ['周四 · 腿','哈克深蹲 4×12','腿举 3×15','腿弯举 3×12 + 提踵'],
+    ['周五 · 有氧','椭圆机/慢跑 35 分钟','拉伸 10 分钟',''],
+    ['周六 · 全身循环','5 个复合动作循环 3 轮（12次/个）','组间少歇，保持心率',''],
+    ['周日 · 休息','散步、备餐、睡够','','']
+  ],
+  bulk_gym: [
+    ['周一 · 胸/三头','杠铃卧推 4×6-8','上斜哑铃卧推 3×8-10','双杠臂屈伸 3组 + 三头下压'],
+    ['周二 · 背/二头','引体/高位下拉 4×8','杠铃划船 4×8','硬拉 3×5 + 弯举'],
+    ['周三 · 肩/核心','推举 4×8','侧平举 4×15','面拉 3×15 + 悬垂举腿'],
+    ['周四 · 腿','深蹲 4×6-8','罗马尼亚硬拉 3×8','腿举+腿弯举 各3组'],
+    ['周五 · 弱项补强','挑最弱 2 个部位各加 3 个动作','',''],
+    ['周六 · 大重量日','三大项冲重量（有人保护）','记录 PR',''],
+    ['周日 · 完全休息','吃够热量，今天不许加练','','']
+  ],
+  keep_dorm: [
+    ['周一 · 上肢','俯卧撑 4组 + 划船 4组','核心 10 分钟',''],
+    ['周二 · 活动日','跑步/球类 30-40 分钟','',''],
+    ['周三 · 下肢','深蹲/弓步/臀桥 各 4 组','',''],
+    ['周四 · 休息','散步 8000 步','',''],
+    ['周五 · 全身循环','30-20-10 循环训练 20 分钟','',''],
+    ['周六 · 趣味运动','打球/骑行/游泳 40 分钟','',''],
+    ['周日 · 休息','拉伸、复盘本周','','']
+  ],
+  keep_gym: [
+    ['周一 · 推','胸+肩+三头 各 3-4 组','',''],
+    ['周二 · 拉','背+二头+后束 各 3-4 组','',''],
+    ['周三 · 有氧','30 分钟中低强度','',''],
+    ['周四 · 腿','深蹲/硬拉/腿举 3-4 组','',''],
+    ['周五 · 弱项','薄弱部位加练','',''],
+    ['周六 · 自由','任选喜欢的运动','',''],
+    ['周日 · 休息','恢复','','']
+  ]
+};
+function renderPlan() {
+  const p = Store.get('health_profile', null);
+  const key = p ? `${p.goal}_${p.place}` : 'cut_dorm';
+  const goalName = {cut:'减脂出线条',bulk:'偏瘦增肌',keep:'维持塑形'}[key.split('_')[0]];
+  const placeName = key.endsWith('gym') ? '健身房' : '宿舍自重';
+  $('#planGrid').innerHTML =
+    `<div class="card" style="grid-column:1/-1"><h3>🗓️ 本周计划 · ${goalName} × ${placeName}</h3>
+      <p class="faint" style="font-size:13px;margin-top:6px">先在「目标测算」里保存你的数据，计划会自动切换。每个动作 8-12 次力竭区间最适合塑形；组间休息 60-90 秒。</p></div>`
+    + PLANS[key].map(([d,...moves])=>`
+      <div class="card"><h3 style="font-size:15px">${d}</h3>
+        <ul style="font-size:13.5px;color:var(--muted);padding-left:18px;margin-top:8px;line-height:2">
+          ${moves.filter(Boolean).map(m=>`<li>${m}</li>`).join('')}
+        </ul></div>`).join('');
+}
+
+/* ---------- 测算 ---------- */
+let profile = Store.get('health_profile', {sex:'m',age:19,h:172,w:65,target:'',act:1.375,goal:'cut',place:'dorm'});
+function fillProfile() {
+  $('#pSex').value=profile.sex; $('#pAge').value=profile.age; $('#pH').value=profile.h;
+  $('#pW').value=profile.w; $('#pTarget').value=profile.target||'';
+  $('#pAct').value=profile.act; $('#pGoal').value=profile.goal; $('#pPlace').value=profile.place;
+}
+function calcProfile() {
+  const {sex,age,h,w,act,goal,target} = profile;
+  const bmr = 10*w + 6.25*h - 5*age + (sex==='m'?5:-161);
+  const tdee = bmr*act;
+  const bmi = w/((h/100)**2);
+  const bmiTag = bmi<18.5?['偏瘦','#5b9dff']:bmi<24?['正常','var(--green)']:bmi<28?['超重','var(--amber)']:['肥胖','var(--red)'];
+  $('#oBmi').textContent=bmi.toFixed(1);
+  $('#oBmiTag').innerHTML=`<span style="color:${bmiTag[1]}">${bmiTag[0]}</span>`;
+  $('#oBmr').textContent=Math.round(bmr);
+  $('#oTdee').textContent=Math.round(tdee);
+  let kcal, proteinG, note;
+  if (goal==='cut') { kcal=tdee-400; proteinG=w*1.8;
+    note='🔥 温和缺口 400 千卡/天，预计每周减 0.3-0.4kg。体重每周下降超过 0.8kg 就多吃一点，保住肌肉和学习精力。'; }
+  else if (goal==='bulk') { kcal=tdee+280; proteinG=w*1.6;
+    note='🏗️ 小幅盈余 280 千卡/天，肌肉增长速度每月约 0.2-0.5kg（新手期更快）。体重涨太快说明脂肪也在涨，减量。'; }
+  else { kcal=tdee; proteinG=w*1.4; note='⚖️ 维持期：吃平 TDEE，用训练改善体型，体重变化应控制在 ±1kg/月。'; }
+  const refW = target || w;
+  proteinG = goal==='cut' ? refW*1.8 : goal==='bulk' ? refW*1.6 : refW*1.4;
+  const fatG = w*0.85;
+  const carbG = Math.max(80,(kcal - proteinG*4 - fatG*9)/4);
+  $('#macro').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+      <div style="background:var(--card-2);border-radius:11px;padding:13px"><div class="faint" style="font-size:12px">热量</div>
+        <div style="font-size:24px;font-weight:800">${Math.round(kcal)}</div><div class="faint" style="font-size:11px">千卡/天</div></div>
+      <div style="background:var(--card-2);border-radius:11px;padding:13px"><div class="faint" style="font-size:12px">蛋白质</div>
+        <div style="font-size:24px;font-weight:800;color:var(--green)">${Math.round(proteinG)}</div><div class="faint" style="font-size:11px">克/天</div></div>
+      <div style="background:var(--card-2);border-radius:11px;padding:13px"><div class="faint" style="font-size:12px">脂肪</div>
+        <div style="font-size:24px;font-weight:800;color:var(--amber)">${Math.round(fatG)}</div><div class="faint" style="font-size:11px">克/天</div></div>
+    </div>
+    <div style="margin-top:10px;text-align:center;font-size:13.5px" class="muted">碳水化合物约 <b style="color:var(--cyan)">${Math.round(carbG)}g</b>/天
+      （主食：米饭每餐约一拳半，训练日可多吃）</div>
+    <div class="bar" style="margin-top:12px">
+      <i style="width:${proteinG*4/kcal*100}%;background:var(--green)"></i>
+      <i style="width:${carbG*4/kcal*100}%;background:var(--cyan)"></i>
+      <i style="width:${fatG*9/kcal*100}%;background:var(--amber)"></i>
+    </div>
+    <div class="legend"><span><i style="background:var(--green)"></i>蛋白 ${Math.round(proteinG*4/kcal*100)}%</span>
+      <span><i style="background:var(--cyan)"></i>碳水 ${Math.round(carbG*4/kcal*100)}%</span>
+      <span><i style="background:var(--amber)"></i>脂肪 ${Math.round(fatG*9/kcal*100)}%</span></div>`;
+  $('#goalNote').innerHTML = note;
+  renderPlan();
+}
+$('#btnSaveP').addEventListener('click', () => {
+  profile = {
+    sex:$('#pSex').value, age:+$('#pAge').value||19, h:+$('#pH').value||170, w:+$('#pW').value||60,
+    target:+$('#pTarget').value||'', act:+$('#pAct').value, goal:$('#pGoal').value, place:$('#pPlace').value
+  };
+  Store.set('health_profile', profile); calcProfile(); toast('方案已生成并保存', 'ok');
+});
+fillProfile(); calcProfile();
+
+/* ---------- 体重记录 ---------- */
+let logs = Store.get('health_logs', []);
+$('#lDate').value = today();
+function renderLog() {
+  const sorted=[...logs].sort((a,b)=>a.date.localeCompare(b.date));
+  drawLineChart($('#wChart'), {
+    values:sorted.map(l=>l.w), labels:sorted.map(l=>l.date.slice(5)),
+    color:'#3ddc97', target:profile.target||null, height:260
+  });
+  $('#wBody').innerHTML = sorted.length ? [...sorted].reverse().slice(0,15).map((l,i)=>`
+    <tr><td>${l.date}</td><td><b>${l.w} kg</b></td><td class="faint">${l.note||'—'}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delLog('${l.date}')">删</button></td></tr>`).join('')
+    : '<tr><td colspan="4"><div class="empty">还没有记录</div></td></tr>';
+}
+$('#btnAddW').addEventListener('click', ()=>{
+  const date=$('#lDate').value, w=parseFloat($('#lW').value);
+  if(!date||!(w>30)) return toast('请填写日期和合理体重', 'err');
+  logs = logs.filter(l=>l.date!==date);
+  logs.push({date,w,note:$('#lNote').value.trim()});
+  Store.set('health_logs', logs);
+  profile.w=w; Store.set('health_profile', profile);
+  $('#lW').value=''; $('#lNote').value=''; calcProfile(); renderLog();
+  toast('体重已记录', 'ok');
+});
+window.delLog = d => { logs=logs.filter(l=>l.date!==d); Store.set('health_logs',logs); renderLog(); };
+renderLog();
+
+/* ---------- 打卡 ---------- */
+let checkins = Store.get('health_checkins', []);
+function streakOf() {
+  let s=0; const d=new Date();
+  if(!checkins.includes(d.toISOString().slice(0,10))) d.setDate(d.getDate()-1);
+  while(checkins.includes(d.toISOString().slice(0,10))){ s++; d.setDate(d.getDate()-1); }
+  return s;
+}
+function renderCheckin() {
+  $('#streak').textContent=streakOf();
+  const t=today();
+  $('#btnCheckin').textContent=checkins.includes(t)?'✅ 今天已打卡，明天继续':'今日打卡（训练/饮食完成）';
+  $('#btnCheckin').disabled=checkins.includes(t);
+  $('#btnCheckin').style.opacity=checkins.includes(t)?.6:1;
+  const days=[]; const d=new Date();
+  for(let i=13;i>=0;i--){ const x=new Date(d);x.setDate(d.getDate()-i); days.push(x.toISOString().slice(0,10)); }
+  $('#dots').innerHTML=days.map(x=>`<span title="${x}" style="width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;
+    background:${checkins.includes(x)?'var(--green)':'var(--card-3)'};color:${checkins.includes(x)?'#06281c':'var(--faint)'}">${x.slice(8)}</span>`).join('');
+}
+$('#btnCheckin').addEventListener('click',()=>{
+  const t=today();
+  if(checkins.includes(t)) return;
+  checkins.push(t); Store.set('health_checkins',checkins); renderCheckin();
+  toast('打卡成功，连胜 +1 🔥','ok');
+});
+renderCheckin();
+</script>
+</body>
+</html>

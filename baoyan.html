@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>保研雷达 · 微创业实验室</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('baoyan.html')</script>
+
+<div class="container">
+  <div class="page-head">
+    <h1>🎯 保研雷达 <span class="pill">Demo</span></h1>
+    <p>高校里最大的信息差不是考试题，而是「保研规则」。很多人大三才知道夏令营要看什么，大一大二全走弯路。这个工具把四年路线、竞赛含金量、GPA 一次算清——它本身也是一个可售卖的信息差产品（咨询/资料包），而你是第一用户。</p>
+  </div>
+
+  <div class="tabs" style="margin-top:20px">
+    <button class="tab on" data-group="b" data-target="paneTl">🧭 四年时间线</button>
+    <button class="tab" data-group="b" data-target="paneComp">🏆 竞赛含金量库</button>
+    <button class="tab" data-group="b" data-target="paneGpa">🧮 GPA 计算器</button>
+    <button class="tab" data-group="b" data-target="paneGap">💰 为什么这是门生意</button>
+  </div>
+
+  <!-- ===== 时间线 ===== -->
+  <section class="tabpane on" id="paneTl" data-group="b">
+    <div class="card" style="margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div><div class="faint" style="font-size:12.5px">总体准备进度</div>
+          <div style="font-size:24px;font-weight:800"><span id="doneCount">0</span> / <span id="totalCount">0</span></div></div>
+        <div class="progress" style="flex:1;min-width:200px"><i id="progBar" style="width:0"></i></div>
+        <button class="btn btn-sm btn-danger" id="btnResetTl">重置勾选</button>
+      </div>
+      <div class="callout" style="margin-bottom:0">⭐ 保研硬通货排序（各校权重不同）：<b>GPA/排名 &gt; 英语六级 &gt; 高水平竞赛 &gt; 科研/论文 &gt; 项目作品集</b>。GPA 从大一第一门课就开始算，这是唯一无法临时补救的指标。</div>
+    </div>
+    <div class="grid g2" id="tlGrid" style="grid-template-columns:repeat(2,1fr);align-items:start"></div>
+  </section>
+
+  <!-- ===== 竞赛库 ===== -->
+  <section class="tabpane" id="paneComp" data-group="b">
+    <div class="toolbar">
+      <select id="compFilter" style="max-width:200px">
+        <option value="all">全部竞赛</option>
+        <option value="code">程序/算法类</option>
+        <option value="math">数学建模类</option>
+        <option value="innov">创新创业类</option>
+        <option value="english">英语/综合类</option>
+      </select>
+      <span class="faint" style="font-size:12.5px">含金量为软工专业保研视角的经验评估（★ 越多越硬），具体以本校推免文件为准</span>
+    </div>
+    <div class="grid g2" id="compGrid" style="grid-template-columns:repeat(2,1fr)"></div>
+  </section>
+
+  <!-- ===== GPA ===== -->
+  <section class="tabpane" id="paneGpa" data-group="b">
+    <div class="grid g2" style="grid-template-columns:3fr 2fr;align-items:start">
+      <div class="card" style="padding:0;overflow:hidden">
+        <h3 style="padding:18px 20px 0">课程成绩录入</h3>
+        <div style="padding:14px 20px">
+          <div class="form-row">
+            <div class="field" style="min-width:160px"><label>课程名</label><input id="gName" placeholder="如: 高等数学(上)"></div>
+            <div class="field" style="max-width:120px"><label>学分</label><input id="gCredit" type="number" step="0.5" value="4"></div>
+            <div class="field" style="max-width:130px"><label>百分制成绩</label><input id="gScore" type="number" min="0" max="100" placeholder="0-100"></div>
+            <button class="btn btn-primary" id="btnAddG">添加</button>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px">
+          <div class="table-wrap"><table>
+            <thead><tr><th>课程</th><th>学分</th><th>成绩</th><th>单科绩点(4.0)</th><th></th></tr></thead>
+            <tbody id="gBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="stat-card" style="margin-bottom:12px"><div class="label">加权平均分</div>
+          <div class="value" id="oAvg">—</div><div class="sub2">按学分加权 · 排名看这个</div></div>
+        <div class="grid g2" style="gap:12px">
+          <div class="stat-card"><div class="label">GPA（4.0 制）</div><div class="value" id="oGpa4" style="font-size:22px">—</div><div class="sub2">常用换算表</div></div>
+          <div class="stat-card"><div class="label">均分/100×5</div><div class="value" id="oGpa5" style="font-size:22px">—</div><div class="sub2">5 分制参考</div></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3 style="font-size:14px;margin-bottom:8px">📐 绩点换算（常见 4.0 制）</h3>
+          <div style="font-size:12.5px" class="muted" id="gpTable"></div>
+          <div class="callout" style="margin-bottom:0;margin-top:10px">不同学校算法不同（北大 4.0 / 浙大 4.0 / 上交 4.3），本校政策查《学生手册》。<b>保研排名用的是教务处算的加权均分，不是你自己估的 GPA。</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 生意 ===== -->
+  <section class="tabpane" id="paneGap" data-group="b">
+    <div class="grid g2" style="grid-template-columns:repeat(2,1fr)">
+      <div class="card"><h3>🧩 信息差在哪？</h3>
+        <ul class="muted" style="font-size:14px;margin-top:8px;padding-left:18px;line-height:2.1">
+          <li>各院校推免比例、加分政策散落在 PDF 和口口相传里</li>
+          <li>夏令营通知 5 月集中发布，投递窗口常只有 1-2 周</li>
+          <li>竞赛哪个对保研有用、几月份报名，大一几乎没人知道</li>
+          <li>导师邮箱、研究方向、录取偏好没有结构化数据</li>
+          <li>个人陈述/推荐信/简历模板一届届重新摸索</li>
+        </ul></div>
+      <div class="card"><h3>💵 怎么把它变成钱？</h3>
+        <ul class="muted" style="font-size:14px;margin-top:8px;padding-left:18px;line-height:2.1">
+          <li><b style="color:var(--text)">免费工具引流</b>：就是本页这个 GPA/时间线工具</li>
+          <li><b style="color:var(--text)">资料包</b>：按院校整理的夏令营手册 ¥29-99</li>
+          <li><b style="color:var(--text)">1v1 咨询</b>：你保研成功后 ¥199-499/小时</li>
+          <li><b style="color:var(--text)">社群</b>：保研信息监督群 ¥99/年</li>
+          <li><b style="color:var(--text)">机构合作</b>：引流分成，注意只做信息搬运不做承诺</li>
+        </ul></div>
+      <div class="card"><h3>⚠️ 合规边界</h3>
+        <ul class="muted" style="font-size:14px;margin-top:8px;padding-left:18px;line-height:2.1">
+          <li>不卖真题/答案，不碰任何考试舞弊</li>
+          <li>不虚构保研案例，信息注明来源与时效</li>
+          <li>不代替官方渠道，提醒用户以教务处文件为准</li>
+          <li>个人信息（成绩单、身份证号）不收集不留存</li>
+        </ul></div>
+      <div class="card"><h3>🎓 对你自己的复利</h3>
+        <ul class="muted" style="font-size:14px;margin-top:8px;padding-left:18px;line-height:2.1">
+          <li>做产品的过程 = 你把规则研究得比谁都透</li>
+          <li>采访学长学姐 = 顺手积累目标院校人脉</li>
+          <li>工具本身是软件作品，可投服务外包/互联网+</li>
+          <li>「我做了个 ×万人用的保研工具」是夏令营面试王炸</li>
+        </ul></div>
+    </div>
+  </section>
+</div>
+
+<script>
+initTabs();
+
+/* ============ 时间线 ============ */
+const STAGES = [
+  {t:'大一上 · 开局定生死', items:[
+    {t:'高数、线代、程序设计基础全部冲 90+', why:'高学分课，决定3年排名'},
+    {t:'找到本校《推免工作办法》读完', why:'规则先行'},
+    {t:'加入 ACM 集训队或技术社团', why:'竞赛入口'},
+    {t:'注册 GitHub，所有代码作业开始上传', why:'作品集从第1天攒'},
+    {t:'摸清本专业保研率与往届去向', why:'目标量化'}]},
+  {t:'大一下 · 打基础+首赛', items:[
+    {t:'英语四级刷到 580+', why:'部分营门槛'},
+    {t:'报名蓝桥杯校赛/省赛（4月）', why:'软工首金'},
+    {t:'完成第一个完整小项目并部署上线', why:'练手+作品'},
+    {t:'暑期竞赛集训 / 自学数据结构', why:'算法是硬功'}]},
+  {t:'大二上 · 进圈子', items:[
+    {t:'六级首考冲 500+，后续刷到 550', why:'顶尖营隐性门槛'},
+    {t:'数学建模校赛 / 国赛（9月）练手', why:'美赛前置'},
+    {t:'主动找导师问「实验室有没有活」', why:'科研入口'},
+    {t:'蓝桥杯省赛（4月）争取省一', why:'推免加分'}]},
+  {t:'大二下 · 竞赛+大创', items:[
+    {t:'申报大学生创新创业训练计划（大创）', why:'国家级项目很值钱'},
+    {t:'互联网+/挑战杯校赛起步', why:'双创顶赛周期长'},
+    {t:'开始读方向论文，复现 1 篇', why:'科研品味'},
+    {t:'准备美赛 MCM/ICM（次年2月）', why:'H/M 奖普及，O/F 奖硬核'}]},
+  {t:'大二暑假 · 第一次质变', items:[
+    {t:'美赛集训 4 天 4 夜实战', why:'2月开赛'},
+    {t:'争取实验室暑期工位 / 线上科研', why:'论文前置'},
+    {t:'做一个能写进简历的完整产品', why:'作品集核心'}]},
+  {t:'大三上 · 出成果', items:[
+    {t:'竞赛集中出奖：蓝桥杯国赛/ICPC/数模', why:'加分落袋'},
+    {t:'把项目成果写成论文或软著', why:'科研证明'},
+    {t:'锁定 3-5 所目标院校与导师', why:'精准投递'},
+    {t:'保持排名，这学期成绩仍计入', why:'别功亏一篑'}]},
+  {t:'大三下 · 材料+投递', items:[
+    {t:'3-4月准备：排名证明、个人陈述、推荐信', why:'5月即开营'},
+    {t:'5-6月海投夏令营（可同时投多所）', why:'窗口极短'},
+    {t:'打磨产品/科研作品集网页', why:'面试加分'},
+    {t:'专业课、英语口语面试模拟', why:'机试+面试'}]},
+  {t:'大三暑假 ~ 大四上 · 收割', items:[
+    {t:'7月参加夏令营，争取「优秀营员」', why:'= 预录取'},
+    {t:'未拿到则冲 9 月预推免', why:'第二波机会'},
+    {t:'9月28日教育部推免系统填报确认', why:'定局'},
+    {t:'回头把经验做成内容/工具卖给学弟学妹', why:'信息差变现'}]}
+];
+const state = Store.get('baoyan_tasks', {});
+function taskId(si, ii){ return `t${si}-${ii}`; }
+function renderTl() {
+  let done=0, total=0;
+  $('#tlGrid').innerHTML = STAGES.map((s,si)=>{
+    const tasks = s.items.map((it,ii)=>{
+      const id=taskId(si,ii); total++; if(state[id])done++;
+      return `<label class="tl-task ${state[id]?'done':''}">
+        <input type="checkbox" ${state[id]?'checked':''} data-id="${id}">
+        <span>${it.t}</span><span class="why">${it.why}</span></label>`;
+    }).join('');
+    const stageDone = s.items.filter((_,ii)=>state[taskId(si,ii)]).length;
+    return `<div class="card"><div class="tl-stage ${stageDone===s.items.length?'done':''}" style="padding-left:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h4 style="flex:1">${s.t}</h4>
+        <span class="pill">${stageDone}/${s.items.length}</span>
+        <div class="progress" style="width:80px"><i style="width:${stageDone/s.items.length*100}%"></i></div>
+      </div>
+      ${tasks}
+    </div></div>`;
+  }).join('');
+  $('#doneCount').textContent=done; $('#totalCount').textContent=total;
+  $('#progBar').style.width=(total?done/total*100:0)+'%';
+}
+$('#tlGrid').addEventListener('change', e=>{
+  if(e.target.dataset.id){ state[e.target.dataset.id]=e.target.checked; Store.set('baoyan_tasks',state); renderTl(); }
+});
+$('#btnResetTl').addEventListener('click',()=>{ if(!confirm('重置所有勾选？'))return; Object.keys(state).forEach(k=>delete state[k]); Store.set('baoyan_tasks',state); renderTl(); });
+renderTl();
+
+/* ============ 竞赛库 ============ */
+const COMPS = [
+  {cat:'code',name:'ICPC / CCPC 国际大学生程序设计竞赛',time:'10-12月区域赛',star:5,grade:'大二起',
+   note:'计算机界最硬核竞赛，区域赛铜牌以上即夏令营亮点，金银牌可冲顶尖院校。需早进集训队，刷题量 500+。'},
+  {cat:'code',name:'蓝桥杯',time:'校赛3月 / 省赛4月 / 国赛6月',star:3,grade:'大一起',
+   note:'性价比之王：报名门槛低、省一率不低，多数学校推免直接加分。大一就该考，每年一届能考三次。'},
+  {cat:'code',name:'CCF CSP 认证',time:'每年多次（3/9/12月）',star:3,grade:'大一起',
+   note:'不是竞赛是能力考试，但 400 分以上在部分院校夏令营等同竞赛奖，且是机试备考的最好模拟。'},
+  {cat:'code',name:'中国软件杯 / 服务外包创新创业大赛',time:'上半年报名，暑期决赛',star:4,grade:'大二起',
+   note:'企业命题、做完整软件作品，和你的创业项目完美复用——把 Demo 做成参赛作品，一份代码两份收益。'},
+  {cat:'math',name:'全国大学生数学建模竞赛（国赛）',time:'9月开赛，3天3夜',star:4,grade:'大二',
+   note:'认可度极高的传统赛事，省一/国奖推免加分，三人组队建议抱数学+写作+编程分工。'},
+  {cat:'math',name:'MCM/ICM 美国大学生数学建模竞赛',time:'每年2月，4天4夜',star:4,grade:'大二',
+   note:'出国与保研都认，O/F 奖（特等奖提名/特等奖）极硬核，H/M 奖参与面广，顺便练英文学术写作。'},
+  {cat:'math',name:'全国大学生数学竞赛（高数类）',time:'10-11月',star:3,grade:'大一',
+   note:'大一高数基础直接能考，非数专业组获奖率友好，是你大学第一个能拿的奖。'},
+  {cat:'innov',name:'中国国际大学生创新大赛（原"互联网+"）',time:'校赛4-6月 / 省赛7-9月',star:5,grade:'大二起',
+   note:'双创赛事天花板，金奖推免几乎保送。你的微创业项目+真实用户数据就是最好的商业组素材。'},
+  {cat:'innov',name:'"挑战杯"（大挑/小挑）',time:'两年一届交替',star:5,grade:'大二起',
+   note:'大挑看学术科技作品，小挑看创业计划，与互联网+材料可复用，校团委资源多。'},
+  {cat:'innov',name:'大学生创新创业训练计划（大创）',time:'每年3-5月申报',star:4,grade:'大二',
+   note:'不是比赛是项目：国家级立项+结项证书在推免中含金量高，找导师挂名，把创业项目包装成研究课题。'},
+  {cat:'english',name:'全国大学生英语竞赛（NECCS）',time:'校赛4月 / 决赛5月',star:2,grade:'大一',
+   note:'准备成本低，特等奖难但国家级奖项有用，和四级刷分同步进行即可。'},
+  {cat:'english',name:'CET-4 / CET-6',time:'6月、12月',star:3,grade:'大一-大二',
+   note:'不是竞赛但硬门槛：四级建议580+，六级500+起步、冲550。顶尖院校夏令营卡六级，大一能考就立刻考。'}
+];
+const starLine = n=>`<span style="color:var(--amber)">${'★'.repeat(n)}</span><span style="opacity:.2">${'★'.repeat(5-n)}</span>`;
+function renderComp(){
+  const cat=$('#compFilter').value;
+  const list=COMPS.filter(c=>cat==='all'||c.cat===cat);
+  $('#compGrid').innerHTML=list.map(c=>`
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h3 style="flex:1;font-size:15.5px">${c.name}</h3><span>${starLine(c.star)}</span>
+      </div>
+      <div class="tags" style="margin:8px 0">
+        <span class="tag cyan">🕐 ${c.time}</span><span class="tag violet">建议：${c.grade}</span>
+      </div>
+      <p class="muted" style="font-size:13px">${c.note}</p>
+    </div>`).join('');
+}
+$('#compFilter').addEventListener('change',renderComp);
+renderComp();
+
+/* ============ GPA ============ */
+const GP_TABLE=[[90,4.0],[85,3.7],[82,3.3],[78,3.0],[75,2.7],[72,2.3],[68,2.0],[64,1.5],[60,1.0],[0,0]];
+function gpa4(s){ for(const[line,g]of GP_TABLE){ if(s>=line)return g; } return 0; }
+$('#gpTable').innerHTML = '90-100→4.0｜85-89→3.7｜82-84→3.3｜78-81→3.0｜75-77→2.7｜72-74→2.3｜68-71→2.0｜64-67→1.5｜60-63→1.0｜&lt;60→0';
+let courses=Store.get('baoyan_courses',null);
+if(courses===null){
+  courses=[
+    {name:'高等数学(上)',credit:5,score:92},
+    {name:'线性代数',credit:3,score:88},
+    {name:'程序设计基础(C)',credit:4,score:95},
+    {name:'大学英语(1)',credit:3,score:85},
+    {name:'思想道德与法治',credit:3,score:90}
+  ];
+  Store.set('baoyan_courses',courses);
+}
+function renderGpa(){
+  let credits=0,wsum=0,gsum=0;
+  courses.forEach(c=>{credits+=c.credit;wsum+=c.credit*c.score;gsum+=c.credit*gpa4(c.score);});
+  const avg=credits?wsum/credits:0, g=credits?gsum/credits:0;
+  $('#oAvg').textContent=courses.length?avg.toFixed(2):'—';
+  $('#oGpa4').textContent=courses.length?g.toFixed(2):'—';
+  $('#oGpa5').textContent=courses.length?(avg/100*5).toFixed(2):'—';
+  $('#gBody').innerHTML=courses.length?courses.map((c,i)=>`
+    <tr><td><b>${c.name}</b></td><td>${c.credit}</td>
+      <td><span class="${c.score>=90?'up':c.score<60?'down':''}">${c.score}</span></td>
+      <td>${gpa4(c.score).toFixed(1)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="delCourse(${i})">删</button></td></tr>`).join('')
+    :'<tr><td colspan="5"><div class="empty">先添加一门课</div></td></tr>';
+}
+$('#btnAddG').addEventListener('click',()=>{
+  const name=$('#gName').value.trim(), credit=parseFloat($('#gCredit').value), score=parseFloat($('#gScore').value);
+  if(!name||!(credit>0)||!(score>=0&&score<=100)) return toast('请正确填写课程名、学分和0-100的成绩','err');
+  courses.push({name,credit,score}); Store.set('baoyan_courses',courses);
+  $('#gName').value=''; $('#gScore').value=''; renderGpa(); toast('课程已添加','ok');
+});
+window.delCourse=i=>{courses.splice(i,1);Store.set('baoyan_courses',courses);renderGpa();};
+renderGpa();
+</script>
+</body>
+</html>

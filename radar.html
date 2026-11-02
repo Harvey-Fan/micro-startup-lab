@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>信息差雷达 · 微创业实验室</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('radar.html')</script>
+
+<div class="container">
+  <div class="page-head">
+    <h1>🌐 信息差雷达 <span class="pill">Demo</span></h1>
+    <p>信息差生意的作战室：用计算器把「看着有差价」变成「算得清利润」，用信息源库建立你的情报网，用机会看板给每个想法打个分再决定要不要动手。</p>
+  </div>
+
+  <div class="tabs" style="margin-top:20px">
+    <button class="tab on" data-group="r" data-target="paneCalc">🧮 跨境差价计算器</button>
+    <button class="tab" data-group="r" data-target="paneSrc">📡 信息源库</button>
+    <button class="tab" data-group="r" data-target="paneOpp">🎯 机会评分看板</button>
+  </div>
+
+  <!-- ============ 计算器 ============ -->
+  <section class="tabpane on" id="paneCalc" data-group="r">
+    <div class="grid g2" style="grid-template-columns:3fr 2fr;align-items:start">
+      <div class="card">
+        <h3 style="margin-bottom:14px">跨境单品利润测算</h3>
+        <div class="form-row" style="margin-bottom:12px">
+          <div class="field" style="max-width:220px"><label>商品名</label><input id="cName" placeholder="如: 某款降噪耳机" value="示例商品"></div>
+          <div class="field" style="max-width:200px"><label>套利方向</label>
+            <select id="cMode"><option value="in">海外采购 → 国内销售</option><option value="out">国内采购 → 海外销售</option></select></div>
+        </div>
+        <div class="grid g2" style="gap:12px">
+          <div class="field"><label>采购价（外币）</label><input id="cBuy" type="number" value="120"></div>
+          <div class="field"><label>采购币种</label><select id="cBuyCur"></select></div>
+          <div class="field"><label>销售价（人民币）</label><input id="cSell" type="number" value="1299"></div>
+          <div class="field"><label>预计月销量（件）</label><input id="cQty" type="number" value="40"></div>
+          <div class="field"><label>国际运费/件（¥）</label><input id="cShip" type="number" value="60"></div>
+          <div class="field"><label>关税及综合税率（%）</label><input id="cTax" type="number" value="13"></div>
+          <div class="field"><label>销售平台佣金（%）</label><input id="cFee" type="number" value="5"></div>
+          <div class="field"><label>其他成本/件（¥：退货/包装/推广）</label><input id="cOther" type="number" value="40"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn btn-primary" id="btnCalc">测算利润</button>
+          <button class="btn" id="btnSaveCase">保存为选品案例</button>
+        </div>
+        <div class="callout warn" style="margin-bottom:0">💡 真实世界还要考虑：正品资质、汇率波动、平台账期、售后退货率、压货资金成本。先小批量测款，别一上来囤货。</div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:12px">测算结果</h3>
+          <div id="result" style="font-size:13.5px"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-bottom:6px">💱 汇率表 <span id="fxBadge" class="tag amber" style="vertical-align:middle">实时汇率获取中…</span></h3>
+          <p class="faint" style="font-size:11.5px;margin-bottom:10px" id="fxDate">打开页面自动拉取参考汇率，仍可手动修改</p>
+          <div id="rates" style="display:grid;gap:8px"></div>
+          <button class="btn btn-sm" id="btnFx" style="margin-top:10px">刷新实时汇率</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;padding:0;overflow:hidden">
+      <h3 style="padding:18px 20px 0">已保存的选品案例</h3>
+      <div style="padding:16px 20px 20px">
+        <div class="table-wrap"><table>
+          <thead><tr><th>商品</th><th>方向</th><th>单件利润</th><th>利润率</th><th>月利润预估</th><th>评级</th><th></th></tr></thead>
+          <tbody id="caseBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 信息源库 ============ -->
+  <section class="tabpane" id="paneSrc" data-group="r">
+    <div class="toolbar">
+      <input id="srcSearch" placeholder="🔍 搜索信息源名称或说明…" style="max-width:320px">
+      <select id="srcCat" style="max-width:170px">
+        <option value="all">全部分类</option>
+        <option value="crypto">加密/金融</option><option value="tech">科技/产品</option>
+        <option value="academic">学术/保研</option><option value="global">出海/商业</option>
+        <option value="deal">比价/省钱</option><option value="health">健康/营养</option>
+        <option value="custom">我添加的</option>
+      </select>
+      <span style="flex:1"></span>
+      <button class="btn btn-primary btn-sm" id="btnAddSrc">＋ 添加我的信息源</button>
+    </div>
+    <div id="srcList"></div>
+    <div class="callout">🕵️ <b>信息源使用法</b>：每天固定 20 分钟刷 3-5 个源（建议 Product Hunt + Hacker News + 一个垂直源），用飞书文档建「灵感库」，每周五花 30 分钟复盘：哪些信息在国内还没人做？这就是你的选题流水线。</div>
+  </section>
+
+  <!-- ============ 机会看板 ============ -->
+  <section class="tabpane" id="paneOpp" data-group="r">
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-bottom:6px">给想法打分（1-5 分，分数越高越好）</h3>
+      <p class="faint" style="font-size:12.5px;margin-bottom:14px">评分 = 利润潜力×0.30 + 上手容易度×0.25 + 竞争小×0.25 + 成本低×0.20</p>
+      <div class="form-row">
+        <div class="field" style="min-width:200px"><label>想法名称</label><input id="oName" placeholder="如: 给留学生做二手家具平台"></div>
+        <div class="field"><label>利润潜力</label><input id="oProfit" type="number" min="1" max="5" value="3"></div>
+        <div class="field"><label>上手容易</label><input id="oEasy" type="number" min="1" max="5" value="3"></div>
+        <div class="field"><label>竞争程度（5=竞争极小）</label><input id="oComp" type="number" min="1" max="5" value="3"></div>
+        <div class="field"><label>成本友好（5=几乎零成本）</label><input id="oCost" type="number" min="1" max="5" value="5"></div>
+        <button class="btn btn-primary" id="btnAddOpp">加入看板</button>
+      </div>
+    </div>
+    <div class="grid g2" id="oppGrid" style="grid-template-columns:repeat(2,1fr)"></div>
+  </section>
+</div>
+
+<script>
+initTabs();
+
+/* ============ 汇率（真实 API：Frankfurter → open.er-api → 本地兜底） ============ */
+const FX_CUR = ['USD','EUR','GBP','JPY','HKD'];
+const DEFAULT_RATES = { USD:7.18, EUR:7.82, GBP:9.15, JPY:0.0482, HKD:0.92, CNY:1 };
+let rates = Store.get('radar_rates', DEFAULT_RATES);
+const curName = { USD:'美元 USD', EUR:'欧元 EUR', GBP:'英镑 GBP', JPY:'日元 JPY', HKD:'港币 HKD', CNY:'人民币 CNY' };
+function renderRates() {
+  $('#rates').innerHTML = Object.keys(rates).map(k => `
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+      <b style="width:46px">${k}</b><input type="number" step="0.0001" value="${rates[k]}"
+        onchange="rates['${k}']=+this.value||rates['${k}'];Store.set('radar_rates',rates)"
+        style="padding:6px 10px;font-size:13px"><span class="faint">→ 1 ${k} 兑 CNY</span>
+    </div>`).join('');
+  $('#cBuyCur').innerHTML = Object.keys(rates).map(k=>`<option value="${k}" ${k==='USD'?'selected':''}>${curName[k]}</option>`).join('');
+}
+function applyFx(next, label, dateStr) {
+  rates = Object.assign({}, rates, next, { CNY: 1 });
+  Store.set('radar_rates', rates);
+  $('#fxBadge').className = 'tag green';
+  $('#fxBadge').textContent = '● ' + label;
+  $('#fxDate').textContent = '参考汇率日期：' + dateStr + '（可手动修改，测算使用修改值）';
+  renderRates(); calc();
+}
+async function fetchLiveRates(manual) {
+  $('#fxBadge').className = 'tag amber';
+  $('#fxBadge').textContent = '实时汇率获取中…';
+  // 源① Frankfurter：欧洲央行参考汇率，报价是「1 CNY = X 外币」，取倒数
+  try {
+    const d = await fetchJSON('https://api.frankfurter.dev/v1/latest?base=CNY&symbols=' + FX_CUR.join(','));
+    if (!d || !d.rates) throw new Error('bad payload');
+    const next = {}; FX_CUR.forEach(k => { if (d.rates[k]) next[k] = +(1 / d.rates[k]).toFixed(5); });
+    applyFx(next, 'Frankfurter · 欧洲央行', d.date);
+    if (manual) toast('实时汇率已更新', 'ok');
+    return;
+  } catch (e1) {}
+  // 源② open.er-api：报价即「1 CNY = X」
+  try {
+    const d = await fetchJSON('https://open.er-api.com/v6/latest/CNY');
+    if (!d || d.result !== 'success' || !d.rates) throw new Error('bad payload');
+    const next = {}; FX_CUR.forEach(k => { if (d.rates[k]) next[k] = +(1 / d.rates[k]).toFixed(5); });
+    applyFx(next, 'open.er-api 实时汇率', (d.time_last_update_utc || '').slice(0, 16));
+    if (manual) toast('实时汇率已更新', 'ok');
+    return;
+  } catch (e2) {}
+  // 全部失败：保留当前值
+  $('#fxBadge').className = 'tag amber';
+  $('#fxBadge').textContent = '实时汇率不可用 · 使用本地值';
+  $('#fxDate').textContent = '网络受限，正在使用缓存/默认汇率，可手动修改';
+  if (manual) toast('汇率接口不可达，已保留当前值', 'err');
+}
+$('#btnFx').addEventListener('click', () => fetchLiveRates(true));
+renderRates();
+fetchLiveRates(false);
+
+/* ============ 利润测算 ============ */
+let cases = Store.get('radar_cases', []);
+function calc() {
+  const buy = +$('#cBuy').value, cur = $('#cBuyCur').value;
+  const sell = +$('#cSell').value, qty = +$('#cQty').value || 0;
+  const ship = +$('#cShip').value || 0, taxRate = +$('#cTax').value || 0;
+  const feeRate = +$('#cFee').value || 0, other = +$('#cOther').value || 0;
+  const mode = $('#cMode').value;
+  const buyCNY = buy * (rates[cur] ?? 1);
+  const tax = (buyCNY + ship) * taxRate / 100;
+  const fee = sell * feeRate / 100;
+  const unitCost = buyCNY + ship + tax + fee + other;
+  const profit = sell - unitCost;
+  const margin = sell ? profit / sell * 100 : 0;
+  const roi = unitCost ? profit / unitCost * 100 : 0;
+  const month = profit * qty;
+  let grade, gcls, advice;
+  if (margin >= 30 && roi >= 40) { grade = '强烈值得测款'; gcls = 'green'; advice = '差价充足，建议小批量（10-20 件）验证真实转化与退货率。'; }
+  else if (margin >= 15) { grade = '可以小步试'; gcls = 'cyan'; advice = '毛利可以但容错一般，务必压低成本端（物流/拿货价）再动手。'; }
+  else if (margin >= 5) { grade = '谨慎'; gcls = 'amber'; advice = '利润太薄，一次汇率波动或退货就亏损，除非走量否则不建议。'; }
+  else { grade = '不建议'; gcls = 'red'; advice = '负毛利或接近亏损，换品或换采购渠道。'; }
+  $('#result').innerHTML = `
+    <div class="stat-card" style="margin-bottom:12px">
+      <div class="label">单件净利润</div>
+      <div class="value ${profit>=0?'up':'down'}">¥${fmt(profit)}</div>
+      <div class="sub2">销售 ¥${fmt(sell)} − 综合成本 ¥${fmt(unitCost)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 14px">
+      <div class="muted">采购成本</div><div style="text-align:right">¥${fmt(buyCNY)}</div>
+      <div class="muted">国际运费</div><div style="text-align:right">¥${fmt(ship)}</div>
+      <div class="muted">关税(¥)</div><div style="text-align:right">¥${fmt(tax)}</div>
+      <div class="muted">平台佣金</div><div style="text-align:right">¥${fmt(fee)}</div>
+      <div class="muted">其他成本</div><div style="text-align:right">¥${fmt(other)}</div>
+      <div class="muted">销售毛利率</div><div style="text-align:right" class="${margin>=0?'up':'down'}">${fmt(margin)}%</div>
+      <div class="muted">投入回报率 ROI</div><div style="text-align:right" class="${roi>=0?'up':'down'}">${fmt(roi)}%</div>
+      <div class="muted">月利润预估</div><div style="text-align:right" class="${month>=0?'up':'down'}"><b>¥${fmt0(month)}</b></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;border-radius:10px;text-align:center;font-weight:700;display:block"
+      class="tag ${gcls}">评级：${grade}</div>
+    <p class="faint" style="font-size:12.5px;margin-top:8px">${advice}（方向：${mode==='in'?'海淘→国内':'国产→出海'}）</p>`;
+  return { name:$('#cName').value || '未命名', mode, profit, margin, month, grade, gcls };
+}
+function renderCases() {
+  $('#caseBody').innerHTML = cases.length ? cases.map((c,i)=>`
+    <tr><td><b>${c.name}</b></td>
+      <td class="faint">${c.mode==='in'?'海淘→国内':'国产→海外'}</td>
+      <td class="${c.profit>=0?'up':'down'}">¥${fmt(c.profit)}</td>
+      <td class="${c.margin>=0?'up':'down'}">${fmt(c.margin)}%</td>
+      <td class="${c.month>=0?'up':'down'}">¥${fmt0(c.month)}</td>
+      <td><span class="tag ${c.gcls}">${c.grade}</span></td>
+      <td><button class="btn btn-sm btn-danger" onclick="delCase(${i})">删</button></td></tr>`).join('')
+    : `<tr><td colspan="7"><div class="empty"><div class="big">🧪</div>测算后点「保存为选品案例」，建立你自己的选品库</div></td></tr>`;
+}
+$('#btnCalc').addEventListener('click', calc);
+$('#btnSaveCase').addEventListener('click', () => {
+  const r = calc(); cases.unshift(r); if (cases.length > 50) cases.pop();
+  Store.set('radar_cases', cases); renderCases(); toast('选品案例已保存', 'ok');
+});
+window.delCase = i => { cases.splice(i,1); Store.set('radar_cases', cases); renderCases(); };
+renderCases(); calc();
+
+/* ============ 信息源 ============ */
+const SEED_SRC = [
+  {cat:'crypto', icon:'₿', name:'CoinGecko', url:'https://www.coingecko.com', note:'最全的加密市值/基本面数据，免费 API 就是本站记账 Demo 的行情源'},
+  {cat:'crypto', icon:'📊', name:'DeFiLlama', url:'https://defillama.com', note:'各公链 TVL、收益池数据，发现新链新叙事'},
+  {cat:'crypto', icon:'⛓️', name:'Etherscan', url:'https://etherscan.io', note:'以太坊浏览器，聪明钱地址追踪，链上记账的数据源'},
+  {cat:'tech', icon:'🚀', name:'Product Hunt', url:'https://www.producthunt.com', note:'全球新产品首发地，每周看榜单训练「新品雷达」'},
+  {cat:'tech', icon:'📰', name:'Hacker News', url:'https://news.ycombinator.com', note:'硅谷技术圈头版，AI 新工具总是先出现在这里'},
+  {cat:'tech', icon:'🐙', name:'GitHub Trending', url:'https://github.com/trending', note:'热门开源项目趋势，找练手项目和技术方向'},
+  {cat:'tech', icon:'⚡', name:'V2EX', url:'https://www.v2ex.com', note:'中文技术社区，独立开发者赚钱实录集散地'},
+  {cat:'academic', icon:'📄', name:'arXiv', url:'https://arxiv.org', note:'论文预印本，AI/HCI 新研究第一时间读，保研科研必备'},
+  {cat:'academic', icon:'🎓', name:'Google Scholar', url:'https://scholar.google.com', note:'文献检索与引用追踪，综述类工具的数据源'},
+  {cat:'academic', icon:'🕸️', name:'Connected Papers', url:'https://www.connectedpapers.com', note:'可视化论文关系网，快速进入一个研究领域'},
+  {cat:'academic', icon:'🏫', name:'保研人 / 知乎保研话题', url:'https://www.zhihu.com', note:'夏令营、院校政策经验帖，信息差最浓的地方'},
+  {cat:'global', icon:'💡', name:'Indie Hackers', url:'https://www.indiehackers.com', note:'独立开发者公开收入与复盘，微创业教科书'},
+  {cat:'global', icon:'📈', name:'SimilarWeb', url:'https://www.similarweb.com', note:'查任意网站流量来源，竞品调研神器'},
+  {cat:'global', icon:'🌍', name:'Starter Story', url:'https://www.starterstory.com', note:'几十万个小生意的案例库与启动数据'},
+  {cat:'deal', icon:'🐪', name:'CamelCamelCamel', url:'https://camelcamelcamel.com', note:'亚马逊历史价格曲线，海淘差价判断利器'},
+  {cat:'deal', icon:'🛒', name:'什么值得买', url:'https://www.smzdm.com', note:'国内好价社区，对照海外价格找套利空间'},
+  {cat:'deal', icon:'📉', name:'慢慢买', url:'https://www.manmanbuy.com', note:'全网历史比价，国内电商同款查价'},
+  {cat:'health', icon:'🔬', name:'Examine', url:'https://examine.com', note:'营养补剂与饮食的循证证据库，薄肌内容创作的弹药库'},
+  {cat:'health', icon:'🏥', name:'PubMed', url:'https://pubmed.ncbi.nlm.nih.gov', note:'运动营养一手论文，做健康号引用来源，专业度碾压'},
+  {cat:'health', icon:'🥗', name:'中国食物成分表在线数据库', url:'https://www.icnl.cn', note:'中国食物热量/蛋白质数据，食堂选择器类产品的底层数据'}
+];
+let customSrc = Store.get('radar_src', []);
+const CAT_NAME = {crypto:'加密/金融',tech:'科技/产品',academic:'学术/保研',global:'出海/商业',deal:'比价/省钱',health:'健康/营养',custom:'我添加的'};
+function renderSrc() {
+  const q = $('#srcSearch').value.trim().toLowerCase();
+  const cat = $('#srcCat').value;
+  const all = [...SEED_SRC.map(s=>({...s, mine:false})), ...customSrc.map(s=>({...s, mine:true}))];
+  const list = all.filter(s =>
+    (cat==='all' || s.cat===cat || (cat==='custom' && s.mine)) &&
+    (!q || s.name.toLowerCase().includes(q) || s.note.toLowerCase().includes(q)));
+  $('#srcList').innerHTML = list.length ? list.map(s => `
+    <a class="source-item" href="${s.url}" target="_blank" rel="noopener">
+      <span class="si-icon">${s.icon||'🔗'}</span>
+      <span class="si-main"><b>${s.name}</b> ${s.mine?'<span class="tag pink" style="margin-left:6px">我添加的</span>':''}
+        <span class="tag" style="margin-left:6px">${CAT_NAME[s.cat]||''}</span>
+        <p>${s.note}</p></span>
+      <span style="color:var(--faint)">↗</span>
+    </a>`).join('') : '<div class="empty" style="border:1px solid var(--line);border-radius:12px"><div class="big">🔍</div>没有匹配的信息源</div>';
+}
+$('#srcSearch').addEventListener('input', renderSrc);
+$('#srcCat').addEventListener('change', renderSrc);
+$('#btnAddSrc').addEventListener('click', () => {
+  const name = prompt('信息源名称：'); if (!name) return;
+  const url = prompt('网址（https:// 开头）：'); if (!url) return;
+  const note = prompt('一句话说明它好在哪：') || '';
+  customSrc.unshift({cat:'custom', icon:'🔗', name, url: url.startsWith('http')?url:'https://'+url, note});
+  Store.set('radar_src', customSrc); renderSrc(); toast('信息源已添加', 'ok');
+});
+renderSrc();
+
+/* ============ 机会评分 ============ */
+let opps = Store.get('radar_opps', [
+  {name:'给留学生做二手家具/转租信息板', profit:3, easy:4, comp:4, cost:5},
+  {name:'垂直行业 AI 周报（如法律 AI）', profit:4, easy:3, comp:3, cost:5},
+  {name:'宿舍健身饮食打卡小程序', profit:3, easy:4, comp:3, cost:5},
+  {name:'通用证件照 AI 处理站', profit:3, easy:5, comp:1, cost:4}
+]);
+function scoreOf(o) {
+  return Math.round(o.profit*0.30*20 + o.easy*0.25*20 + o.comp*0.25*20 + o.cost*0.20*20);
+}
+function renderOpp() {
+  const sorted = opps.map((o,i)=>({...o, i, s:scoreOf(o)})).sort((a,b)=>b.s-a.s);
+  $('#oppGrid').innerHTML = sorted.map(o => {
+    const lv = o.s>=80?['值得 All in','green']:o.s>=65?['优先验证','cyan']:o.s>=50?['观察池','amber']:['暂缓','red'];
+    const bar = (label,v)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;margin-top:7px">
+      <span class="faint" style="width:118px">${label}</span>
+      <span class="bar" style="flex:1"><i style="width:${v*20}%;background:var(--grad)"></i></span><b>${v}</b></div>`;
+    return `<div class="card">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="score" style="font-size:30px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">${o.s}</div>
+        <div style="flex:1"><b style="font-size:15px">${o.name}</b><br><span class="tag ${lv[1]}">${lv[0]}</span></div>
+        <button class="btn btn-sm btn-danger" onclick="delOpp(${o.i})">删</button>
+      </div>
+      ${bar('利润潜力',o.profit)}${bar('上手容易',o.easy)}${bar('竞争小',o.comp)}${bar('成本低',o.cost)}
+    </div>`;
+  }).join('');
+}
+$('#btnAddOpp').addEventListener('click', () => {
+  const name = $('#oName').value.trim(); if (!name) return toast('先给想法起个名字', 'err');
+  const clamp = v => Math.max(1, Math.min(5, +v||1));
+  opps.push({name, profit:clamp($('#oProfit').value), easy:clamp($('#oEasy').value),
+    comp:clamp($('#oComp').value), cost:clamp($('#oCost').value)});
+  Store.set('radar_opps', opps); $('#oName').value=''; renderOpp(); toast('已加入机会看板', 'ok');
+});
+window.delOpp = i => { opps.splice(i,1); Store.set('radar_opps', opps); renderOpp(); };
+renderOpp();
+</script>
+</body>
+</html>

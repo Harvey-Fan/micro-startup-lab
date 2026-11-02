@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>加密记账本 · 微创业实验室</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/common.js"></script>
+<script>renderNav('crypto.html')</script>
+
+<div class="container">
+  <div class="page-head">
+    <h1>₿ 加密记账本 <span class="pill" style="vertical-align:middle">Demo</span></h1>
+    <p>多币种持仓 · 移动加权平均成本 · 浮动/已实现盈亏 · 交易流水导出。这是商业版「多链记账 SaaS」的核心账本模块——先把账算对，再谈自动同步钱包。</p>
+  </div>
+
+  <!-- 行情条 -->
+  <div class="card" style="margin-top:22px;padding:14px 18px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <b style="font-size:13px">行情</b>
+      <span id="srcBadge" class="tag amber">● 正在连接实时行情…</span>
+      <span class="faint" style="font-size:12px" id="updated">—</span>
+      <span style="flex:1"></span>
+      <button class="btn btn-sm" id="btnRefresh">刷新行情</button>
+    </div>
+    <div id="ticker" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:13px"></div>
+  </div>
+
+  <!-- 统计卡 -->
+  <div class="grid g4" style="grid-template-columns:repeat(4,1fr);margin-top:18px">
+    <div class="stat-card"><div class="label">💼 总市值</div><div class="value" id="sValue">¥0</div><div class="sub2">所有持仓现价合计</div></div>
+    <div class="stat-card"><div class="label">🧾 持仓成本</div><div class="value" id="sCost">¥0</div><div class="sub2">移动加权平均法</div></div>
+    <div class="stat-card"><div class="label">📈 浮动盈亏</div><div class="value" id="sFloat">¥0</div><div class="sub2" id="sFloatPct">—</div></div>
+    <div class="stat-card"><div class="label">💰 累计已实现盈亏</div><div class="value" id="sRealized">¥0</div><div class="sub2">历史卖出已落袋</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:18px;grid-template-columns:3fr 2fr">
+    <div class="card">
+      <h3 style="margin-bottom:12px">组合市值走势（本次会话）</h3>
+      <canvas id="chart" style="width:100%"></canvas>
+      <div class="legend"><span><i style="background:#38e1ff"></i>总市值(CNY)</span><span class="faint">实时 60s 自动刷新 · 数据源 Binance/Gate/CoinGecko</span></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:12px">持仓占比</h3>
+      <div id="alloc"></div>
+    </div>
+  </div>
+
+  <!-- 记账表单 -->
+  <div class="card" style="margin-top:18px">
+    <h3 style="margin-bottom:14px">✍️ 记一笔交易</h3>
+    <div class="form-row">
+      <div class="field" style="max-width:110px"><label>方向</label>
+        <select id="fType"><option value="buy">买入</option><option value="sell">卖出</option></select></div>
+      <div class="field" style="max-width:150px"><label>币种</label><select id="fCoin"></select></div>
+      <div class="field"><label>单价 (CNY/币)</label><input id="fPrice" type="number" step="0.000001" placeholder="自动填入现价"></div>
+      <div class="field"><label>数量</label><input id="fAmount" type="number" step="0.000001" placeholder="0.00"></div>
+      <div class="field" style="max-width:170px"><label>备注（可选）</label><input id="fNote" placeholder="如: 定投"></div>
+      <button class="btn btn-primary" id="btnAdd">确认记账</button>
+    </div>
+    <div class="callout" style="margin-bottom:0">📌 商业版升级点：交易所 API Key 只读同步、Etherscan 链上地址监听、多法币汇率、年度税务报表（资本利得表）。</div>
+  </div>
+
+  <!-- 持仓表 -->
+  <div class="card" style="margin-top:18px;padding:0;overflow:hidden">
+    <div style="padding:18px 20px 0;display:flex;align-items:center"><h3>当前持仓</h3><span style="flex:1"></span>
+      <button class="btn btn-sm" id="btnExport">导出 CSV</button>
+      <button class="btn btn-sm btn-danger" id="btnReset" style="margin-left:8px">清空数据</button>
+    </div>
+    <div style="padding:16px 20px 20px">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>币种</th><th>持仓量</th><th>均价</th><th>现价</th><th>市值</th><th>浮动盈亏</th><th>操作</th></tr></thead>
+          <tbody id="holdBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 流水 -->
+  <div class="card" style="margin-top:18px;padding:0;overflow:hidden">
+    <h3 style="padding:18px 20px 0">交易流水</h3>
+    <div style="padding:16px 20px 20px">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时间</th><th>方向</th><th>币种</th><th>单价</th><th>数量</th><th>金额</th><th>备注</th><th></th></tr></thead>
+          <tbody id="txBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- 币种基础数据（base 仅作实时接口全挂时的兜底锚点） ---------- */
+const COINS = {
+  BTC:{name:'比特币', base:472000, color:'#f7931a', cg:'bitcoin',     bn:'BTCUSDT', gt:'BTC_USDT'},
+  ETH:{name:'以太坊', base:25200,  color:'#8a92b2', cg:'ethereum',    bn:'ETHUSDT', gt:'ETH_USDT'},
+  SOL:{name:'Solana', base:1180,   color:'#9945ff', cg:'solana',      bn:'SOLUSDT', gt:'SOL_USDT'},
+  BNB:{name:'BNB',    base:4180,   color:'#f3ba2f', cg:'binancecoin', bn:'BNBUSDT', gt:'BNB_USDT'},
+  XRP:{name:'XRP',    base:4.35,   color:'#25a4e8', cg:'ripple',      bn:'XRPUSDT', gt:'XRP_USDT'},
+  DOGE:{name:'狗狗币', base:1.08,  color:'#c2a633', cg:'dogecoin',    bn:'DOGEUSDT',gt:'DOGE_USDT'},
+  ADA:{name:'Cardano',base:2.85,   color:'#3468d1', cg:'cardano',     bn:'ADAUSDT', gt:'ADA_USDT'},
+  USDT:{name:'泰达币', base:7.18,  color:'#26a17b', cg:'tether',      bn:null,      gt:null}
+};
+
+let txns = Store.get('crypto_txns', null);
+if (txns === null) {
+  // 首次访问：写入示例数据，让演示开箱即用
+  const now = Date.now(); const day = 86400000;
+  txns = [
+    {id:uid(), type:'buy', symbol:'BTC', price:425000, amount:0.05, time:new Date(now-60*day).toISOString().slice(0,16), note:'定投起步'},
+    {id:uid(), type:'buy', symbol:'ETH', price:22800,  amount:0.6,  time:new Date(now-45*day).toISOString().slice(0,16), note:''},
+    {id:uid(), type:'buy', symbol:'SOL', price:980,     amount:8,    time:new Date(now-30*day).toISOString().slice(0,16), note:'生态布局'},
+    {id:uid(), type:'buy', symbol:'BTC', price:458000, amount:0.03, time:new Date(now-12*day).toISOString().slice(0,16), note:'回调加仓'},
+    {id:uid(), type:'sell',symbol:'SOL', price:1320,    amount:2,    time:new Date(now-3*day).toISOString().slice(0,16), note:'止盈一部分'}
+  ];
+  Store.set('crypto_txns', txns);
+}
+let prices = {};
+let openPrices = {};   // 模拟模式下的「日内基准」，仅离线兜底用
+let change24h = {};    // 实时模式：交易所返回的真实 24h 涨跌幅
+Object.keys(COINS).forEach(s => { prices[s] = COINS[s].base * (0.94 + Math.random() * 0.1); openPrices[s] = prices[s]; });
+let liveMode = false;  // true=真实交易所行情；false=全部实时源不可达时的本地模拟
+let liveSrc = '';
+let cnyPerUsd = 7.18;  // 交易所报价是 USDT，需乘 USD/CNY 汇率折算人民币
+let valueHistory = [];
+
+/* ---------- 持仓与盈亏计算（移动加权平均） ---------- */
+function computeHoldings() {
+  const h = {}; let realized = 0;
+  [...txns].sort((a,b)=>a.time.localeCompare(b.time)).forEach(t => {
+    const k = t.symbol;
+    if (!h[k]) h[k] = { amount:0, cost:0 };
+    if (t.type === 'buy') { h[k].amount += t.amount; h[k].cost += t.price * t.amount; }
+    else {
+      const avg = h[k].amount > 0 ? h[k].cost / h[k].amount : t.price;
+      const sold = Math.min(t.amount, h[k].amount);
+      realized += (t.price - avg) * sold;
+      h[k].amount -= sold;
+      h[k].cost = Math.max(0, h[k].cost - avg * sold);
+      if (h[k].amount < 1e-9) { h[k].amount = 0; h[k].cost = 0; }
+    }
+  });
+  return { h, realized };
+}
+
+function render() {
+  const { h, realized } = computeHoldings();
+  let totalValue = 0, totalCost = 0;
+  Object.keys(h).forEach(k => {
+    if (h[k].amount > 1e-8) { totalValue += h[k].amount * prices[k]; totalCost += h[k].cost; }
+  });
+  const float = totalValue - totalCost;
+  $('#sValue').textContent = '¥' + fmt0(totalValue);
+  $('#sCost').textContent = '¥' + fmt0(totalCost);
+  const fe = $('#sFloat');
+  fe.textContent = (float >= 0 ? '+' : '') + '¥' + fmt0(float);
+  fe.className = 'value ' + (float >= 0 ? 'up' : 'down');
+  $('#sFloatPct').innerHTML = totalCost ? `<span class="${float>=0?'up':'down'}">${pct(float/totalCost*100)}</span> · 收益率` : '—';
+  const re = $('#sRealized');
+  re.textContent = (realized >= 0 ? '+' : '') + '¥' + fmt0(realized);
+  re.className = 'value ' + (realized >= 0 ? 'up' : 'down');
+
+  // 持仓表
+  const rows = Object.keys(h).filter(k => h[k].amount > 1e-8);
+  $('#holdBody').innerHTML = rows.length ? rows.map(k => {
+    const avg = h[k].cost / h[k].amount;
+    const val = h[k].amount * prices[k];
+    const p = (prices[k] - avg) / avg * 100;
+    const c = COINS[k];
+    return `<tr>
+      <td><div class="coin"><span class="coin-dot" style="background:${c.color}">${k.slice(0,1)}</span>${k}<small class="faint"> ${c.name}</small></div></td>
+      <td>${fmt(h[k].amount, h[k].amount<1?4:2)}</td>
+      <td>¥${fmt(avg, avg<10?4:2)}</td>
+      <td>¥${fmt(prices[k], prices[k]<10?4:2)}</td>
+      <td>¥${fmt0(val)}</td>
+      <td class="${p>=0?'up':'down'}">${pct(p)}</td>
+      <td><button class="btn btn-sm" onclick="quickSell('${k}')">减仓</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7"><div class="empty"><div class="big">📭</div>还没有持仓，先在上面记一笔买入吧</div></td></tr>`;
+
+  // 占比
+  $('#alloc').innerHTML = rows.length ? (() => {
+    const sorted = rows.map(k => [k, h[k].amount * prices[k]]).sort((a,b)=>b[1]-a[1]);
+    return `<div class="bar" style="height:14px;border-radius:8px">${sorted.map(([k,v])=>
+      `<i style="width:${v/totalValue*100}%;background:${COINS[k].color}"></i>`).join('')}</div>
+      <div style="margin-top:14px;display:grid;gap:9px">${sorted.map(([k,v])=>`
+        <div style="display:flex;align-items:center;gap:10px;font-size:13.5px">
+          <span class="coin-dot" style="width:20px;height:20px;font-size:10px;background:${COINS[k].color}">${k.slice(0,1)}</span>
+          <b>${k}</b><span class="faint">${COINS[k].name}</span>
+          <span style="flex:1"></span><span>${(v/totalValue*100).toFixed(1)}%</span>
+          <span class="faint">¥${fmt0(v)}</span></div>`).join('')}</div>`;
+  })() : '<p class="faint" style="font-size:13px">暂无持仓</p>';
+
+  // 流水
+  $('#txBody').innerHTML = txns.length ? [...txns].reverse().map(t => `
+    <tr>
+      <td class="faint" style="font-size:12.5px">${t.time.replace('T',' ')}</td>
+      <td><span class="tag ${t.type==='buy'?'green':'red'}">${t.type==='buy'?'买入':'卖出'}</span></td>
+      <td><b>${t.symbol}</b></td>
+      <td>¥${fmt(t.price, t.price<10?4:2)}</td>
+      <td>${fmt(t.amount, t.amount<1?4:2)}</td>
+      <td>¥${fmt0(t.price*t.amount)}</td>
+      <td class="faint">${t.note||'—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="delTxn('${t.id}')">删</button></td>
+    </tr>`).join('') : `<tr><td colspan="8"><div class="empty">暂无流水</div></td></tr>`;
+
+  // 走势图
+  valueHistory.push(totalValue);
+  if (valueHistory.length > 120) valueHistory.shift();
+  drawLineChart($('#chart'), { values:valueHistory, color:'#38e1ff', height:230 });
+
+  // 行情条
+  $('#ticker').innerHTML = Object.keys(COINS).map(k => {
+    let dHtml;
+    if (liveMode) {
+      dHtml = (change24h[k] == null)
+        ? '<span class="faint" style="font-size:12px">24h —</span>'
+        : `<span class="${change24h[k]>=0?'up':'down'}" style="font-size:12px">${pct(change24h[k])} <span class="faint">24h</span></span>`;
+    } else {
+      const d = (prices[k] - openPrices[k]) / openPrices[k] * 100;
+      dHtml = `<span class="${d>=0?'up':'down'}" style="font-size:12px">${pct(d)}</span>`;
+    }
+    return `<span><span class="coin-dot" style="width:18px;height:18px;font-size:9px;background:${COINS[k].color};display:inline-grid;margin-right:5px">${k.slice(0,1)}</span>
+      <b>${k}</b> ¥${fmt(prices[k], prices[k]<10?4:0)}
+      ${dHtml}</span>`;
+  }).join('');
+  $('#updated').textContent = (liveMode ? liveSrc + ' · ' : '') + '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+}
+
+/* ---------- 行情：真实 API 多源，全挂时才本地模拟 ---------- */
+// 源① 汇率：Frankfurter(欧洲央行) → open.er-api → 常量兜底
+async function fetchCnyPerUsd() {
+  try {
+    const d = await fetchJSON('https://api.frankfurter.dev/v1/latest?base=CNY&symbols=USD');
+    if (d && d.rates && d.rates.USD) return 1 / d.rates.USD;
+    throw new Error('bad payload');
+  } catch (e1) {
+    try {
+      const d = await fetchJSON('https://open.er-api.com/v6/latest/CNY');
+      if (d && d.rates && d.rates.USD) return 1 / d.rates.USD;
+      throw new Error('bad payload');
+    } catch (e2) { return 7.18; }
+  }
+}
+
+// 源② Binance 公共行情（data-api 端点无需 Key、支持 CORS）
+async function fetchBinance() {
+  const symbols = Object.values(COINS).filter(c => c.bn).map(c => c.bn);
+  const q = encodeURIComponent(JSON.stringify(symbols));
+  const arr = await fetchJSON('https://data-api.binance.vision/api/v3/ticker/24hr?symbols=' + q);
+  const bySym = {}; arr.forEach(x => bySym[x.symbol] = x);
+  const out = {};
+  Object.keys(COINS).forEach(k => {
+    const c = COINS[k]; if (!c.bn || !bySym[c.bn]) return;
+    out[k] = { usd: +bySym[c.bn].lastPrice, chg: +bySym[c.bn].priceChangePercent };
+  });
+  if (!Object.keys(out).length) throw new Error('empty binance');
+  return { out, src: 'Binance 实时行情' };
+}
+
+// 源③ Gate.io 现货行情（无需 Key、支持 CORS）
+async function fetchGate() {
+  const pairs = Object.values(COINS).filter(c => c.gt).map(c => c.gt);
+  const qs = pairs.map(p => 'currency_pair=' + p).join('&');
+  const arr = await fetchJSON('https://api.gateio.ws/api/v4/spot/tickers?' + qs);
+  const byPair = {}; arr.forEach(x => byPair[x.currency_pair] = x);
+  const out = {};
+  Object.keys(COINS).forEach(k => {
+    const c = COINS[k]; if (!c.gt || !byPair[c.gt]) return;
+    out[k] = { usd: +byPair[c.gt].last, chg: +byPair[c.gt].change_percentage };
+  });
+  if (!Object.keys(out).length) throw new Error('empty gate');
+  return { out, src: 'Gate.io 实时行情' };
+}
+
+// 源④ CoinGecko 法币直接报价（海外网络通常最快，国内常超时）
+async function fetchCoinGecko() {
+  const ids = Object.values(COINS).map(c => c.cg).join(',');
+  const d = await fetchJSON(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=cny&include_24hr_change=true`);
+  const out = {};
+  Object.keys(COINS).forEach(k => {
+    const row = d[COINS[k].cg]; if (!row || !row.cny) return;
+    out[k] = { cny: row.cny, chg: row.cny_24h_change ?? null };
+  });
+  if (!Object.keys(out).length) throw new Error('empty coingecko');
+  return { out, src: 'CoinGecko 实时行情', directCny: true };
+}
+
+async function fetchLive(manual) {
+  $('#btnRefresh').textContent = '连接中…';
+  cnyPerUsd = await fetchCnyPerUsd();
+  let data = null;
+  for (const f of [fetchBinance, fetchGate, fetchCoinGecko]) {
+    try { data = await f(); break; } catch (e) { /* 尝试下一个源 */ }
+  }
+  if (!data) {
+    liveMode = false; liveSrc = '';
+    $('#srcBadge').className = 'tag amber';
+    $('#srcBadge').textContent = '● 实时源暂不可用 · 本地模拟中';
+    $('#btnRefresh').textContent = '重试实时行情';
+    if (manual) toast('实时接口均不可达，已切换本地模拟行情', 'err');
+    return;
+  }
+  Object.keys(COINS).forEach(k => {
+    const q = data.out[k]; if (!q) return;
+    prices[k] = data.directCny ? q.cny : q.usd * (k === 'USDT' ? 1 : cnyPerUsd);
+    change24h[k] = q.chg;
+  });
+  prices.USDT = data.directCny ? prices.USDT : cnyPerUsd;
+  change24h.USDT = data.directCny ? change24h.USDT ?? null : null;
+  liveMode = true; liveSrc = data.src;
+  $('#srcBadge').className = 'tag green';
+  $('#srcBadge').textContent = '● ' + data.src + (data.directCny ? '' : ' · USD/CNY ' + cnyPerUsd.toFixed(3));
+  $('#btnRefresh').textContent = '刷新行情';
+  if (manual) toast('实时行情已更新', 'ok');
+  render();
+}
+
+// 离线兜底：4 秒随机游走；每 5 分钟自动尝试重回实时源
+function tickSim() {
+  if (liveMode) return;
+  Object.keys(COINS).forEach(k => {
+    if (k === 'USDT') { prices[k] = cnyPerUsd + (Math.random()-0.5)*0.02; return; }
+    prices[k] *= 1 + (Math.random() - 0.5) * 0.016;
+  });
+  render();
+}
+setInterval(() => { if (liveMode) fetchLive(false); }, 60000);           // 实时模式 60s 限流刷新
+setInterval(() => { if (!liveMode) fetchLive(false); }, 5 * 60000);      // 离线模式 5 分钟自动重连
+
+/* ---------- 交互 ---------- */
+$('#fCoin').innerHTML = Object.keys(COINS).map(k=>`<option value="${k}">${k} · ${COINS[k].name}</option>`).join('');
+$('#fCoin').addEventListener('change', fillPrice);
+$('#fType').addEventListener('change', fillPrice);
+function fillPrice() {
+  const k = $('#fCoin').value;
+  $('#fPrice').value = +prices[k].toFixed(prices[k] < 10 ? 4 : 2);
+}
+$('#fCoin').dispatchEvent(new Event('change'));
+
+$('#btnAdd').addEventListener('click', () => {
+  const type = $('#fType').value, symbol = $('#fCoin').value;
+  const price = parseFloat($('#fPrice').value), amount = parseFloat($('#fAmount').value);
+  if (!(price > 0) || !(amount > 0)) return toast('请输入正确的单价和数量', 'err');
+  const { h } = computeHoldings();
+  if (type === 'sell' && (!h[symbol] || amount > h[symbol].amount + 1e-9))
+    return toast('卖出数量超过持仓量', 'err');
+  txns.push({ id:uid(), type, symbol, price, amount, time:new Date().toISOString().slice(0,16), note:$('#fNote').value.trim() });
+  Store.set('crypto_txns', txns);
+  $('#fAmount').value=''; $('#fNote').value='';
+  toast('记账成功', 'ok');
+  render();
+});
+function quickSell(k) {
+  $('#fType').value='sell'; $('#fCoin').value=k; fillPrice();
+  $('#fAmount').focus();
+  window.scrollTo({top:$('#fAmount').getBoundingClientRect().top + window.scrollY - 120, behavior:'smooth'});
+}
+function delTxn(id) {
+  txns = txns.filter(t => t.id !== id);
+  Store.set('crypto_txns', txns); render(); toast('已删除该流水');
+}
+$('#btnRefresh').addEventListener('click', () => fetchLive(true));
+$('#btnExport').addEventListener('click', () => {
+  downloadCSV('crypto-ledger-' + today() + '.csv',
+    [['时间','方向','币种','单价CNY','数量','金额CNY','备注'],
+     ...[...txns].sort((a,b)=>a.time.localeCompare(b.time)).map(t=>[t.time,t.type==='buy'?'买入':'卖出',t.symbol,t.price,t.amount,(t.price*t.amount).toFixed(2),t.note])]);
+  toast('CSV 已导出', 'ok');
+});
+$('#btnReset').addEventListener('click', () => {
+  if (!confirm('确定清空全部交易流水？此操作不可恢复')) return;
+  txns = []; Store.set('crypto_txns', txns); render(); toast('已清空');
+});
+
+render();
+setInterval(tickSim, 4000);   // 离线兜底：4 秒模拟跳动
+fetchLive(false);              // 打开页面即自动连接真实行情
+</script>
+</body>
+</html>
