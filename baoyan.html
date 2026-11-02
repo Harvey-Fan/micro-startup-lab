@@ -20,6 +20,7 @@
     <button class="tab on" data-group="b" data-target="paneTl">🧭 四年时间线</button>
     <button class="tab" data-group="b" data-target="paneComp">🏆 竞赛含金量库</button>
     <button class="tab" data-group="b" data-target="paneGpa">🧮 GPA 计算器</button>
+    <button class="tab" data-group="b" data-target="paneSchool">🏫 目标院校库</button>
     <button class="tab" data-group="b" data-target="paneGap">💰 为什么这是门生意</button>
   </div>
 
@@ -86,6 +87,33 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ===== 目标院校库 ===== -->
+  <section class="tabpane" id="paneSchool" data-group="b">
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:12px">➕ 添加目标院校</h3>
+      <div class="form-row">
+        <div class="field" style="min-width:150px"><label>学校</label><input id="sName" placeholder="如: 浙江大学"></div>
+        <div class="field" style="min-width:150px"><label>学院/专业</label><input id="sMajor" placeholder="如: 软件学院 软件工程"></div>
+        <div class="field" style="max-width:120px"><label>层次</label>
+          <select id="sTier"><option>C9</option><option selected>985</option><option>211</option><option>双一流</option><option>双非强校</option><option>境外</option></select></div>
+        <div class="field" style="max-width:120px"><label>学科评估</label>
+          <select id="sDisc"><option>A+</option><option>A</option><option>A-</option><option>B+</option><option selected>B</option><option>B-及以下</option><option>暂不了解</option></select></div>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <div class="field" style="min-width:150px"><label>夏令营/预推免月份</label><input id="sMonth" placeholder="如: 夏令营 5-6月"></div>
+        <div class="field" style="flex:2"><label>官网/通知链接</label><input id="sUrl" placeholder="https://…"></div>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <div class="field" style="flex:1"><label>备注（导师/截止日/材料）</label><input id="sNote" placeholder="如: 王老师做分布式；要机试；6月15截止"></div>
+        <button class="btn btn-primary" id="btnAddSchool">加入资料库</button>
+      </div>
+    </div>
+
+    <div id="sBoard" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px"></div>
+    <div class="grid g2" id="schoolGrid" style="grid-template-columns:repeat(2,1fr)"></div>
+    <div class="callout">📌 保研是<b>信息差最浓</b>的环节：各校通知发布时间、机试形式、导师名额都不同。建议每所目标院校都点进官网核实，再用「备注」记录截止日期和材料清单。这个资料库未来就是你卖《院校夏令营手册》的原始数据库。</div>
   </section>
 
   <!-- ===== 生意 ===== -->
@@ -283,6 +311,69 @@ $('#btnAddG').addEventListener('click',()=>{
 });
 window.delCourse=i=>{courses.splice(i,1);Store.set('baoyan_courses',courses);renderGpa();};
 renderGpa();
+
+/* ============ 目标院校资料库 ============ */
+const STATUSES = ['了解中','准备中','已投递','已入营','拿到offer','已放弃'];
+const STATUS_CLS = { '了解中':'', '准备中':'cyan', '已投递':'violet', '已入营':'amber', '拿到offer':'green', '已放弃':'red' };
+let schools = Store.get('baoyan_schools', null);
+if (schools === null) {
+  schools = [
+    {id:uid(),name:'浙江大学',major:'软件学院 软件工程',tier:'C9',disc:'暂不了解',month:'夏令营 5-6月',url:'https://www.cs.zju.edu.cn',note:'软件学科顶尖，机试偏算法；通知以学院官网为准',st:'了解中'},
+    {id:uid(),name:'华中科技大学',major:'软件学院',tier:'985',disc:'暂不了解',month:'夏令营 5-6月',url:'http://cse.hust.edu.cn',note:'武汉，招生量大；自行核实当年政策',st:'了解中'},
+    {id:uid(),name:'电子科技大学',major:'信息与软件工程学院',tier:'985',disc:'暂不了解',month:'夏令营 6-7月',url:'https://www.uestc.edu.cn',note:'成都，信软招生规模大；信息以官网为准',st:'了解中'}
+  ];
+  Store.set('baoyan_schools', schools);
+}
+function renderSchools() {
+  const counts = Object.fromEntries(STATUSES.map(s => [s, 0]));
+  schools.forEach(s => { counts[s.st] = (counts[s.st] || 0) + 1; });
+  $('#sBoard').innerHTML = STATUSES.map(s =>
+    `<div class="stat-card" style="flex:1;min-width:100px;padding:12px 16px">
+       <div class="label">${s}</div><div style="font-size:22px;font-weight:800;color:var(--${s==='拿到offer'?'green':s==='已放弃'?'red':'text'})">${counts[s]}</div>
+     </div>`).join('');
+  $('#schoolGrid').innerHTML = schools.length ? schools.map(s => `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0;flex:1">${s.name}</h3>
+        <select onchange="setSchoolStatus('${s.id}',this.value)" style="width:auto;padding:6px 10px;font-size:12.5px">
+          ${STATUSES.map(x => `<option ${x===s.st?'selected':''}>${x}</option>`).join('')}
+        </select>
+      </div>
+      <p class="muted" style="font-size:13px;margin:6px 0">${s.major||'—'}</p>
+      <div class="tags">
+        <span class="tag violet">${s.tier}</span><span class="tag cyan">学科 ${s.disc}</span>
+        ${s.month ? `<span class="tag amber">🕐 ${s.month}</span>` : ''}
+        <span class="tag ${STATUS_CLS[s.st]||''}">${s.st}</span>
+      </div>
+      ${s.note ? `<p class="faint" style="font-size:12.5px;margin:9px 0 0">📝 ${s.note}</p>` : ''}
+      <div style="margin-top:11px;display:flex;gap:8px;align-items:center">
+        ${/^https?:\/\//.test(s.url) ? `<a class="btn btn-sm" href="${s.url}" target="_blank" rel="noopener">官网 ↗</a>` : ''}
+        <span style="flex:1"></span>
+        <button class="btn btn-sm btn-danger" onclick="delSchool('${s.id}')">删除</button>
+      </div>
+    </div>`).join('') : '<p class="faint" style="grid-column:1/-1;text-align:center;padding:30px">还没有目标院校，先添加 3-5 所拉开梯度（冲 / 稳 / 保）</p>';
+}
+$('#btnAddSchool').addEventListener('click', () => {
+  const name = $('#sName').value.trim();
+  if (!name) return toast('学校名称必填', 'err');
+  const url = $('#sUrl').value.trim();
+  schools.push({
+    id: uid(), name, major: $('#sMajor').value.trim(), tier: $('#sTier').value,
+    disc: $('#sDisc').value, month: $('#sMonth').value.trim(),
+    url: url && !/^https?:\/\//.test(url) ? 'https://' + url : url,
+    note: $('#sNote').value.trim(), st: '了解中'
+  });
+  Store.set('baoyan_schools', schools);
+  ['sName','sMajor','sMonth','sUrl','sNote'].forEach(id => $('#' + id).value = '');
+  renderSchools(); toast('已加入资料库', 'ok');
+});
+window.setSchoolStatus = (id, st) => {
+  const s = schools.find(x => x.id === id); if (!s) return;
+  s.st = st; Store.set('baoyan_schools', schools); renderSchools();
+  if (st === '拿到offer') toast('🎉 恭喜入袋为安！', 'ok');
+};
+window.delSchool = id => { schools = schools.filter(s => s.id !== id); Store.set('baoyan_schools', schools); renderSchools(); };
+renderSchools();
 </script>
 </body>
 </html>

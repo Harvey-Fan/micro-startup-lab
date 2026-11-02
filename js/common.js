@@ -45,7 +45,32 @@ function renderNav(active) {
   <footer class="foot"><div class="container">
     <p class="disc">⚠️ 行情来自 Binance/Gate.io/CoinGecko 公开接口、汇率来自欧洲央行参考汇率、食品数据来自 Open Food Facts；网络受限时自动降级为本地模拟。数据仅保存在你自己的浏览器(localStorage)中，不构成任何投资建议。</p>
     <p>微创业实验室 · 为软件工程新生打造的「信息差产品」练习场 — 学技术 · 做产品 · 理解商业 · 反哺学业</p>
+    <p style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+      <span style="display:inline-flex;align-items:center;gap:6px">
+        <img alt="全站访客" style="height:20px"
+          src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fharvey-fan.github.io%2Fmicro-startup-lab%2F&label=%E8%AE%BF%E5%AE%A2&labelColor=%231d2946&countColor=%2338e1ff&style=flat"
+          onerror="this.style.display='none'">
+        <span class="faint">你是第 <b id="localVisits" style="color:var(--cyan)">—</b> 次打开本站</span>
+      </span>
+      <span class="faint">·</span><a href="https://github.com/Harvey-Fan/micro-startup-lab" target="_blank" rel="noopener" style="font-size:12px">GitHub 源码</a>
+    </p>
   </div></footer>`);
+
+  // 本地访问次数
+  const n = (Store.get('site_visits', 0) || 0) + 1;
+  Store.set('site_visits', n);
+  const lv = document.getElementById('localVisits');
+  if (lv) lv.textContent = n;
+
+  // 百度统计（注册 tongji.baidu.com 拿到站点 ID 后填入即可自动生效；留空不加载）
+  const BAIDU_TONGJI_ID = '';
+  if (BAIDU_TONGJI_ID) {
+    window._hmt = window._hmt || [];
+    const hm = document.createElement('script');
+    hm.src = 'https://hm.baidu.com/hm.js?' + BAIDU_TONGJI_ID;
+    hm.async = 1;
+    document.head.appendChild(hm);
+  }
 }
 
 /* ---------- Tabs ---------- */

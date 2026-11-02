@@ -48,6 +48,31 @@
     </div>
   </div>
 
+  <!-- 链上钱包 -->
+  <div class="card" style="margin-top:18px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h3 style="margin:0">🔗 链上钱包自动同步</h3>
+      <span class="tag cyan">只读公开数据 · 无需私钥/API Key</span>
+      <span style="flex:1"></span>
+      <span id="walletQuota" class="faint" style="font-size:12.5px"></span>
+    </div>
+    <p class="faint" style="font-size:12.5px;margin:8px 0 14px">BTC 走 Blockstream 浏览器、ETH 走公共 RPC 自动读取地址余额并按实时行情折成人民币。钱包余额只显示市值、<b style="color:var(--text)">不参与成本盈亏</b>；点「计入账本」并填成本价后才进入持仓核算。</p>
+    <div class="form-row">
+      <div class="field" style="max-width:120px"><label>链</label>
+        <select id="wChain"><option value="BTC">BTC 比特币</option><option value="ETH">ETH 以太坊</option></select></div>
+      <div class="field"><label>钱包地址</label><input id="wAddr" placeholder="粘贴 BTC 地址或 0x 开头的 ETH 地址"></div>
+      <button class="btn btn-primary" id="btnAddWallet">添加并同步</button>
+      <button class="btn btn-sm" id="btnSyncWallets" style="margin-bottom:1px">全部刷新</button>
+    </div>
+    <div style="margin-top:14px" class="table-wrap">
+      <table>
+        <thead><tr><th>链</th><th>地址</th><th>余额</th><th>市值(CNY)</th><th>同步状态</th><th>操作</th></tr></thead>
+        <tbody id="walletBody"></tbody>
+      </table>
+    </div>
+    <div class="callout warn" style="margin-bottom:0">🔒 永远不要向任何网站输入私钥或助记词。这里只需要公开地址；本站不提供交易撮合、代客理财，钱包数据仅保存在你的浏览器。</div>
+  </div>
+
   <!-- 记账表单 -->
   <div class="card" style="margin-top:18px">
     <h3 style="margin-bottom:14px">✍️ 记一笔交易</h3>
@@ -65,9 +90,14 @@
 
   <!-- 持仓表 -->
   <div class="card" style="margin-top:18px;padding:0;overflow:hidden">
-    <div style="padding:18px 20px 0;display:flex;align-items:center"><h3>当前持仓</h3><span style="flex:1"></span>
+    <div style="padding:18px 20px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <h3 style="margin:0">当前持仓</h3>
+      <span id="planBadge"></span>
+      <span style="flex:1"></span>
       <button class="btn btn-sm" id="btnExport">导出 CSV</button>
-      <button class="btn btn-sm btn-danger" id="btnReset" style="margin-left:8px">清空数据</button>
+      <button class="btn btn-sm" id="btnBackup">备份/恢复</button>
+      <button class="btn btn-sm" id="btnPro" style="border-color:rgba(255,180,84,.5);color:var(--amber)">⭐ 升级 Pro</button>
+      <button class="btn btn-sm btn-danger" id="btnReset">清空数据</button>
     </div>
     <div style="padding:16px 20px 20px">
       <div class="table-wrap">
@@ -90,6 +120,27 @@
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Pro 弹窗（须位于主脚本之前，脚本启动时即绑定事件） -->
+<div id="proModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,8,18,.72);backdrop-filter:blur(4px);place-items:center;padding:20px">
+  <div class="card" style="max-width:460px;width:100%;position:relative">
+    <button id="proClose" style="position:absolute;right:14px;top:12px;background:none;border:none;color:var(--faint);font-size:18px;cursor:pointer">✕</button>
+    <h3 style="font-size:20px">⭐ 加密记账本 Pro</h3>
+    <p class="faint" style="font-size:13px;margin:6px 0 14px">一次激活，永久使用 —— 站长的第一个付费产品实验 🙌</p>
+    <div style="display:grid;gap:8px;font-size:13.5px;margin-bottom:16px">
+      <div>✅ 无限交易流水与钱包地址（免费版 50 条流水 / 2 个钱包）</div>
+      <div>✅ JSON 完整备份 &amp; 换机恢复</div>
+      <div>✅ 高级报表（年度盈亏、税务导出）优先更新</div>
+    </div>
+    <div id="proState"></div>
+    <div id="payWrap" style="margin:14px 0"></div>
+    <div style="display:flex;gap:8px">
+      <input id="proCode" placeholder="输入激活码 MSL-PRO-XXXXXX" style="text-transform:uppercase;font-family:monospace">
+      <button class="btn btn-primary" id="btnRedeem" style="white-space:nowrap">激活 Pro</button>
+    </div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px">支付由面包多完成，本站不接触你的付款信息；激活状态只保存在本机浏览器。</p>
   </div>
 </div>
 
@@ -349,6 +400,10 @@ $('#btnAdd').addEventListener('click', () => {
   const { h } = computeHoldings();
   if (type === 'sell' && (!h[symbol] || amount > h[symbol].amount + 1e-9))
     return toast('卖出数量超过持仓量', 'err');
+  if (type === 'buy' && !plan.pro && txns.length >= FREE_TXN_LIMIT) {
+    openProModal();
+    return toast('免费版最多 ' + FREE_TXN_LIMIT + ' 条流水，升级 Pro 无限记录', 'err');
+  }
   txns.push({ id:uid(), type, symbol, price, amount, time:new Date().toISOString().slice(0,16), note:$('#fNote').value.trim() });
   Store.set('crypto_txns', txns);
   $('#fAmount').value=''; $('#fNote').value='';
@@ -379,6 +434,203 @@ $('#btnReset').addEventListener('click', () => {
 render();
 setInterval(tickSim, 4000);   // 离线兜底：4 秒模拟跳动
 fetchLive(false);              // 打开页面即自动连接真实行情
+
+/* ================= Pro 激活码付费墙 =================
+   卡密在面包多(mianbaoduo.com)以「自动发货商品」售卖：买家付款 → 面包多自动发卡 → 买家在此输入激活。
+   公开代码里只存卡密 SHA-256 哈希，翻源码无法反推明文。 */
+const CODE_HASHES = [
+  '933340b065de8ed0d32d6728f190ae332c31d1a0992511454932923bdfde7888',
+  '37bcb77b92f16a923dd357061385c50c03868524327798cae126644a50329894',
+  '3a1caaab9b5ee6928c2a60f883cf7d14ee0d5e1c11ebc0ef7ff466184f34da5e',
+  '3161c856a54c4dd7449841fbf9f656b9a8587217f05b17a93ec80f02357e1234',
+  'd534cd4ac8e9b029323f2a03679b5b301c54e476bc9c90295e7fc568fe0194e4',
+  '600ab77c50120bbb3ffc288b9dac334ba8c7e8844e5461ca138506681d32dbde',
+  '97bad58aceaf21326c3f1254f065db77403e93b05aba0d31c27a2c48a370fa86',
+  'f8c683ef1905bb219c8ba0f853a6dd684e4ee04062819f0f541bca27d3a3e6c6',
+  'bd6a5acdbbb80b998f151b16684664344725d6b8fbdcfdf65f30ef830f1015c4',
+  '2a1b55181618edba43ebaf6cbbf82b894d163b6e0db174d15baefe7e58a61976'
+];
+const FREE_TXN_LIMIT = 50, FREE_WALLET_LIMIT = 2;
+const plan = Store.get('crypto_pro', { pro: false });
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function renderPlan() {
+  $('#planBadge').innerHTML = plan.pro
+    ? '<span class="tag amber">⭐ Pro 已激活</span>'
+    : `<span class="tag">免费版 · 流水 ${txns.length}/${FREE_TXN_LIMIT} · 钱包 ${wallets.length}/${FREE_WALLET_LIMIT}</span>`;
+  $('#btnPro').textContent = plan.pro ? '⭐ Pro 会员' : '⭐ 升级 Pro';
+  $('#walletQuota').textContent = plan.pro ? 'Pro：钱包数量不限' : `免费版最多 ${FREE_WALLET_LIMIT} 个钱包`;
+}
+function openProModal() {
+  const payUrl = Store.get('crypto_pay_url', '');
+  $('#proState').innerHTML = plan.pro
+    ? '<div class="callout" style="margin:0 0 12px">✅ 你已激活 Pro（激活码 <b>' + (plan.code || '') + '</b>，' + plan.time + '）。全部高级功能已解锁，感谢支持！</div>'
+    : '';
+  $('#payWrap').innerHTML = payUrl
+    ? `<a class="btn btn-primary" href="${payUrl}" target="_blank" rel="noopener" style="width:100%;justify-content:center">🛒 前往面包多购买激活码（付款后自动发卡）</a>
+       <button class="btn btn-sm btn-ghost" id="btnPayCfg" style="width:100%;justify-content:center;margin-top:8px">修改购买链接</button>`
+    : `<div class="callout warn" style="margin:0;font-size:12.5px">尚未配置面包多商品链接。站长在面包多创建「自动发货」商品、把卡密粘贴进卡密库存后，点下方按钮填入链接即可开卖。演示阶段可直接使用内测码 <code>MSL-PRO-6E87AM</code> 体验。</div>
+       <button class="btn btn-sm" id="btnPayCfg" style="width:100%;justify-content:center;margin-top:8px">配置面包多购买链接</button>`;
+  $('#proModal').style.display = 'grid';
+}
+$('#btnPro').addEventListener('click', openProModal);
+$('#proClose').addEventListener('click', () => $('#proModal').style.display = 'none');
+$('#proModal').addEventListener('click', e => { if (e.target.id === 'proModal') e.target.style.display = 'none'; });
+document.addEventListener('click', async e => {
+  if (e.target.id === 'btnPayCfg') {
+    const u = prompt('粘贴面包多商品链接（https://…）：', Store.get('crypto_pay_url', ''));
+    if (u && /^https?:\/\//.test(u)) { Store.set('crypto_pay_url', u); toast('购买链接已保存', 'ok'); openProModal(); }
+  }
+  if (e.target.id === 'btnRedeem') {
+    const code = $('#proCode').value.trim();
+    if (!code) return toast('请输入激活码', 'err');
+    e.target.textContent = '验证中…';
+    const ok = CODE_HASHES.includes(await sha256Hex(code.toUpperCase()));
+    e.target.textContent = '激活 Pro';
+    if (!ok) return toast('激活码无效，检查后重试', 'err');
+    plan.pro = true; plan.code = code.toUpperCase(); plan.time = today();
+    Store.set('crypto_pro', plan);
+    toast('🎉 Pro 激活成功！', 'ok');
+    renderPlan(); renderWallets(); $('#proModal').style.display = 'none';
+  }
+});
+
+/* ================= 链上钱包自动同步 ================= */
+let wallets = Store.get('crypto_wallets', []);
+const shortAddr = a => a.length > 14 ? a.slice(0, 7) + '…' + a.slice(-6) : a;
+function validAddr(chain, addr) {
+  if (chain === 'BTC') return /^(bc1[a-z0-9]{25,90}|[13][a-km-zA-HJ-NP-Z1-9]{25,39})$/.test(addr);
+  return /^0x[0-9a-fA-F]{40}$/.test(addr);
+}
+async function fetchBtcBalance(addr) {
+  for (const base of ['https://blockstream.info/api/address/', 'https://mempool.space/api/address/']) {
+    try {
+      const d = await fetchJSON(base + addr, 9000);
+      const cs = d.chain_stats || {}, ms = d.mempool_stats || {};
+      return ((cs.funded_txo_sum || 0) - (cs.spent_txo_sum || 0)
+            + (ms.funded_txo_sum || 0) - (ms.spent_txo_sum || 0)) / 1e8;
+    } catch (e) {}
+  }
+  throw new Error('btc fail');
+}
+async function fetchEthBalance(addr) {
+  const payload = JSON.stringify({ jsonrpc: '2.0', method: 'eth_getBalance', params: [addr, 'latest'], id: 1 });
+  for (const rpc of ['https://cloudflare-eth.com', 'https://eth.drpc.org', 'https://1rpc.io/eth', 'https://rpc.ankr.com/eth']) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      const r = await fetch(rpc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, signal: ctrl.signal });
+      clearTimeout(timer);
+      const d = await r.json();
+      if (d && d.result) return parseInt(d.result, 16) / 1e18;
+    } catch (e) {}
+  }
+  throw new Error('eth fail');
+}
+async function syncWallet(w) {
+  w.status = 'syncing'; renderWallets();
+  try {
+    w.balance = w.chain === 'BTC' ? await fetchBtcBalance(w.addr) : await fetchEthBalance(w.addr);
+    w.status = 'ok'; w.lastSync = new Date().toLocaleTimeString('zh-CN');
+  } catch (e) { w.status = 'fail'; w.lastSync = ''; }
+  Store.set('crypto_wallets', wallets); renderWallets();
+}
+function renderWallets() {
+  let total = 0;
+  $('#walletBody').innerHTML = wallets.length ? wallets.map((w, i) => {
+    const value = (w.balance != null && prices[w.chain]) ? w.balance * prices[w.chain] : 0;
+    if (w.status === 'ok') total += value;
+    const explorer = w.chain === 'BTC' ? 'https://blockstream.info/address/' + w.addr
+                                          : 'https://etherscan.io/address/' + w.addr;
+    const st = w.status === 'ok' ? '<span class="tag green">已同步 ' + (w.lastSync || '') + '</span>'
+      : w.status === 'syncing' ? '<span class="tag amber">同步中…</span>'
+      : '<span class="tag red">同步失败，点刷新重试</span>';
+    return `<tr>
+      <td><b>${w.chain}</b></td>
+      <td><a href="${explorer}" target="_blank" rel="noopener" style="font-family:monospace;font-size:12.5px">${shortAddr(w.addr)}</a></td>
+      <td>${w.balance != null ? fmt(w.balance, w.balance < 1 ? 6 : 4) : '—'}</td>
+      <td>${w.status === 'ok' ? '¥' + fmt0(value) : '—'}</td>
+      <td>${st}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="syncWallet(wallets[${i}])">刷新</button>
+        <button class="btn btn-sm" onclick="importWallet(${i})">计入账本</button>
+        <button class="btn btn-sm btn-danger" onclick="delWallet(${i})">删</button>
+      </td></tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="empty"><div class="big">🔗</div>添加公开地址即可自动同步。试试：BTC <span style="font-family:monospace">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span> 或 ETH <span style="font-family:monospace">0xd8da6bf26964af9d7eed9e03e53415d37aa96045</span></div></td></tr>`;
+  if (total > 0) $('#walletBody').insertAdjacentHTML('beforeend',
+    `<tr><td colspan="3" style="text-align:right"><b>钱包资产合计</b></td>
+     <td colspan="3"><b class="up">¥${fmt0(total)}</b> <span class="faint" style="font-weight:400">链上快照，不计入持仓盈亏</span></td></tr>`);
+  renderPlan();
+}
+$('#btnAddWallet').addEventListener('click', async () => {
+  let chain = $('#wChain').value, addr = $('#wAddr').value.trim();
+  // 按地址自动识别链，避免选错导致校验失败
+  if (/^0x[0-9a-fA-F]{40}$/.test(addr)) { chain = 'ETH'; $('#wChain').value = 'ETH'; }
+  else if (/^(bc1|[13])/.test(addr)) { chain = 'BTC'; $('#wChain').value = 'BTC'; }
+  if (!validAddr(chain, addr)) return toast('地址格式不正确，请检查', 'err');
+  if (wallets.some(w => w.addr === addr)) return toast('该地址已添加', 'err');
+  if (!plan.pro && wallets.length >= FREE_WALLET_LIMIT) { openProModal(); return toast('免费版限 ' + FREE_WALLET_LIMIT + ' 个钱包，升级 Pro 解锁', 'err'); }
+  const w = { chain, addr, balance: null, status: 'syncing' };
+  wallets.push(w); Store.set('crypto_wallets', wallets); $('#wAddr').value = '';
+  renderWallets();
+  await syncWallet(w);
+});
+$('#btnSyncWallets').addEventListener('click', () => wallets.forEach(syncWallet));
+$('#wAddr').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  if (/^0x/i.test(v)) $('#wChain').value = 'ETH';
+  else if (/^(bc1|[13])/.test(v)) $('#wChain').value = 'BTC';
+});
+window.delWallet = i => { wallets.splice(i, 1); Store.set('crypto_wallets', wallets); renderWallets(); };
+window.importWallet = i => {
+  const w = wallets[i];
+  if (w.status !== 'ok' || !(w.balance > 0)) return toast('钱包还未同步到余额', 'err');
+  const cost = prompt(`把 ${w.chain} 钱包余额 ${fmt(w.balance, 4)} 计入持仓。\n请输入取得成本单价(CNY/币)，默认按当前价：`, prices[w.chain].toFixed(2));
+  if (cost === null) return;
+  const price = parseFloat(cost) || prices[w.chain];
+  txns.push({ id: uid(), type: 'buy', symbol: w.chain, price, amount: w.balance,
+    time: new Date().toISOString().slice(0, 16), note: '钱包导入 ' + shortAddr(w.addr) });
+  Store.set('crypto_txns', txns); render(); renderPlan();
+  toast('已计入持仓账本', 'ok');
+};
+
+/* ================= 备份 / 恢复（Pro） ================= */
+$('#btnBackup').addEventListener('click', () => {
+  if (!plan.pro) { openProModal(); return toast('JSON 备份/换机恢复为 Pro 功能（CSV 导出免费）', 'err'); }
+  if (confirm('确定 = 导出全部数据(JSON 备份)；取消 = 从备份文件恢复。')) {
+    const dump = { v: 1, time: new Date().toISOString(), txns, wallets };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+    a.download = 'crypto-backup-' + today() + '.json'; a.click();
+    URL.revokeObjectURL(a.href); toast('备份文件已下载', 'ok');
+  } else {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = () => {
+      const f = inp.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const d = JSON.parse(reader.result);
+          if (!Array.isArray(d.txns)) throw 0;
+          if (!confirm('恢复将覆盖当前流水和钱包，确定？')) return;
+          txns = d.txns; wallets = d.wallets || [];
+          Store.set('crypto_txns', txns); Store.set('crypto_wallets', wallets);
+          render(); renderWallets(); toast('数据已恢复', 'ok');
+        } catch (e) { toast('备份文件格式不正确', 'err'); }
+      };
+      reader.readAsText(f);
+    };
+    inp.click();
+  }
+});
+
+renderPlan();
+renderWallets();
+if (wallets.length) wallets.forEach(syncWallet);
 </script>
+
 </body>
 </html>
