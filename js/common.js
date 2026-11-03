@@ -26,6 +26,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 /* ---------- 导航与页脚 ---------- */
 const NAV = [
   ['index.html', '创意展厅'],
+  ['admit.html', '录取概率雷达'],
   ['camp.html', '推免雷达'],
   ['crypto.html', '加密记账'],
   ['radar.html', '信息差雷达'],
@@ -149,6 +150,60 @@ function drawLineChart(canvas, { values, labels = [], color = '#38e1ff', target 
     const idxs = values.length <= 6 ? values.map((_, i) => i) : [0, Math.floor((values.length - 1) / 2), values.length - 1];
     idxs.forEach(i => labels[i] && ctx.fillText(labels[i], x(i), H - 8));
   }
+}
+
+/* ---------- 轻量雷达图(Canvas, 无依赖) ---------- */
+function drawRadarChart(canvas, { labels, series, height = 300, max = 100 }) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth || 560, H = height;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2 + 6;
+  const R = Math.min(W, H) / 2 - 58;
+  const N = labels.length;
+  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / N;
+  const pt = (i, r) => [cx + Math.cos(ang(i)) * r, cy + Math.sin(ang(i)) * r];
+
+  // 网格（4 层）
+  ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#64748f'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  for (let ring = 1; ring <= 4; ring++) {
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const [x, y] = pt(i % N, R * ring / 4);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+  }
+  // 轴线 + 标签
+  labels.forEach((lb, i) => {
+    const [x, y] = pt(i, R);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke();
+    const [lx, ly] = pt(i, R + 22);
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '12px sans-serif';
+    ctx.fillText(lb, lx, ly + 4);
+  });
+  // 数据系列
+  series.forEach(s => {
+    ctx.beginPath();
+    s.values.forEach((v, i) => {
+      const [x, y] = pt(i, Math.max(0, Math.min(max, v)) / max * R);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = s.color + '2e'; ctx.fill();
+    ctx.strokeStyle = s.color; ctx.lineWidth = 2;
+    if (s.dash) ctx.setLineDash([6, 4]);
+    ctx.stroke(); ctx.setLineDash([]);
+    s.values.forEach((v, i) => {
+      const [x, y] = pt(i, Math.max(0, Math.min(max, v)) / max * R);
+      ctx.beginPath(); ctx.arc(x, y, s.dash ? 2.4 : 3.4, 0, 7);
+      ctx.fillStyle = s.color; ctx.fill();
+    });
+  });
 }
 
 /* ---------- 带超时的 JSON 请求（GitHub Pages 纯静态站点直连 CORS 接口） ---------- */
