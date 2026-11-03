@@ -442,8 +442,8 @@ function renderSchools(p,d,pd){
     const cur = scoreSchool(s,d);
     const pot = pd ? scoreSchool(s,pd) : cur;
     const item={s,cur,pot};
-    if(cur.score>=68) groups.safe.items.push(item);
-    else if(cur.score>=54) groups.match.items.push(item);
+    if(cur.score>=60) groups.safe.items.push(item);
+    else if(cur.score>=50) groups.match.items.push(item);
     else groups.sprint.items.push(item);
   });
   Object.values(groups).forEach(g=>g.items.sort((a,b)=>b.cur.score-a.cur.score));
